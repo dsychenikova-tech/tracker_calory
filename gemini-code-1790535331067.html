@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#050F1B">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <title>KBJU Tracker</title>
+  
+  <!-- Google Fonts: Onest & Rubik -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            appBg: '#050F1B',
+            accentGreen: '#94FD17',
+            accentOrange: '#FF6434',
+            cardBg: '#1E2632',
+            cardInput: '#1E2631',
+            iconPlateBg: '#343B46',
+            trackBg: '#111A26',
+            textWhite: '#F0F0F0',
+            overRed: '#FD5B71',
+            btnInvert: '#CDCDCD'
+          },
+          fontFamily: {
+            rubik: ['Rubik', 'sans-serif'],
+            onest: ['Onest', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      outline: none !important;
+    }
+    html, body {
+      background-color: #050F1B;
+      overscroll-behavior-y: none;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .scroll-container {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .calendar-mask {
+      mask-image: linear-gradient(to right, black calc(100% - 8px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black calc(100% - 8px), transparent 100%);
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .view-page {
+      opacity: 0;
+      transform: scale(0.985);
+      pointer-events: none;
+      transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .view-page.page-active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .date-card {
+      transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+      -webkit-user-drag: none;
+    }
+    .date-card.active-selected {
+      transform: scale(1.05);
+    }
+
+    .calendar-popup {
+      transform-origin: top right;
+      transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .calendar-popup.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+    .calendar-popup.closed { opacity: 0; transform: scale(0.92) translateY(-14px); pointer-events: none; }
+    .backdrop-anim { transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    .meal-accordion-wrapper {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .meal-accordion-wrapper.open {
+      grid-template-rows: 1fr;
+    }
+    .meal-accordion-body {
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .dock-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 45;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+    .dock-blur-underlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      pointer-events: none;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(to top, rgba(5, 15, 27, 0.95) 20%, rgba(5, 15, 27, 0.6) 60%, transparent 100%);
+      mask-image: linear-gradient(to top, black 65%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to top, black 65%, transparent 100%);
+      z-index: 44;
+    }
+    .dock-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: rgba(30, 38, 50, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 40px;
+      padding: 10px 24px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      pointer-events: auto;
+      z-index: 46;
+      margin-left: auto;
+      margin-right: auto;
+      transform: translateX(0);
+    }
+    .dock-btn {
+      width: 56px;
+      height: 56px;
+      border: none;
+      background: transparent;
+      color: rgba(240, 240, 240, 0.4);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin: 0;
+      flex-shrink: 0;
+      transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .dock-btn:hover { color: #F0F0F0; background: rgba(255, 255, 255, 0.06); }
+    .dock-btn.active { background: #CDCDCD; color: #050F1B; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); }
+
+    .hero-slot {
+      position: relative;
+      width: 64px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin: 0;
+    }
+    .plus-hero-btn {
+      position: absolute;
+      top: -2px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: #FF6434;
+      color: #ffffff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      line-height: 0;
+      padding: 0;
+      z-index: 10;
+      box-shadow: 0 10px 20px rgba(255, 100, 52, 0.35), 0 0 28px rgba(255, 100, 52, 0.22), inset 0 2px 2px rgba(255, 255, 255, 0.5);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .plus-hero-btn svg { display: block; width: 28px; height: 28px; margin: auto; }
+    .hero-slot:hover .plus-hero-btn {
+      transform: translateY(-4px) scale(1.04) rotate(90deg);
+    }
+
+    .ios-switch {
+      width: 51px;
+      height: 31px;
+      border-radius: 9999px;
+      background-color: #2D3748;
+      padding: 2.5px;
+      position: relative;
+      cursor: pointer;
+      outline: none;
+      transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
+    .ios-switch.active { background-color: #FF6434; }
+    .ios-switch .thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      background-color: #FFFFFF;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transform: translateX(0);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ios-switch.active .thumb { transform: translateX(20px); }
+
+    .slide-curtain {
+      transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s ease;
+    }
+    .slide-curtain.hidden-curtain {
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .slide-curtain.open-curtain {
+      transform: translateY(0%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .ios-sheet {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .ios-sheet.sheet-hidden {
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ios-sheet.sheet-open {
+      transform: translateY(0%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-overlay {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.modal-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      transform: scale(0.92) translateY(12px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.modal-active .modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    @keyframes shakeWarning {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); color: #FD5B71; }
+      40%, 80% { transform: translateX(6px); color: #FD5B71; }
+    }
+    .shake-norm {
+      animation: shakeWarning 0.5s ease-in-out;
+      color: #FD5B71 !important;
+    }
+    .shake-norm svg {
+      stroke: #FD5B71 !important;
+    }
+
+    @keyframes shakeWeight {
+      0%, 100% { transform: translateX(0); border-color: transparent; }
+      20%, 60% { transform: translateX(-5px); border-color: #FF6434; box-shadow: 0 0 8px rgba(255,100,52,0.6); }
+      40%, 80% { transform: translateX(5px); border-color: #FF6434; box-shadow: 0 0 8px rgba(255,100,52,0.6); }
+    }
+    .shake-weight-input {
+      animation: shakeWeight 0.5s ease-in-out;
+      border: 1px solid #FF6434 !important;
+    }
+
+    @keyframes shakeRedField {
+      0%, 100% { transform: translateX(0); box-shadow: 0 0 0px #FD5B71; }
+      20%, 60% { transform: translateX(-5px); box-shadow: 0 0 10px #FD5B71; }
+      40%, 80% { transform: translateX(5px); box-shadow: 0 0 10px #FD5B71; }
+    }
+    .shake-red-input {
+      animation: shakeRedField 0.5s ease-in-out;
+      background-color: rgba(253, 91, 113, 0.15) !important;
+    }
+
+    #add-template-row-btn {
+      transition: background-color 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #add-template-row-btn.too-many {
+      background-color: #D9381E !important;
+      transform: scale(0.92);
+    }
+    .btn-icon-wrapper {
+      transition: transform 0.35s ease, opacity 0.25s ease;
+    }
+    .btn-icon-wrapper.icon-sad {
+      transform: rotate(180deg);
+    }
+
+    .limit-warning-box {
+      max-height: 0px;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.38s ease;
+    }
+    .limit-warning-box.active {
+      max-height: 40px;
+      opacity: 1;
+      margin-bottom: 10px;
+    }
+    
+    #templates-stack {
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-0 sm:p-4 text-textWhite font-onest antialiased bg-appBg">
+
+  <div id="app-viewport" class="relative w-full max-w-[430px] h-screen sm:h-[932px] bg-appBg overflow-hidden sm:rounded-[56px] shadow-2xl sm:border-[8px] sm:border-[#1F2937]/70 flex flex-col transition-colors duration-500">
+    
+    <main class="relative flex-1 w-full h-full overflow-hidden">
+      
+      <!-- ЭКРАН 1: ГЛАВНЫЙ -->
+      <div id="view-home" class="view-page page-active absolute inset-0 overflow-hidden">
+        
+        <div id="calendar-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[14px] z-30 opacity-0 pointer-events-none backdrop-anim"></div>
+
+        <div id="calendar-popup" class="calendar-popup closed absolute left-5 right-5 z-[120] bg-cardBg rounded-[20px] pt-[21px] pb-[21px] px-[27px] shadow-2xl flex flex-col select-none">
+          <div class="flex items-center justify-between w-full">
+            <button id="cal-prev-month" aria-label="Предыдущий месяц" class="p-1 text-accentGreen hover:opacity-80 active:scale-90 transition-transform">
+              <svg class="w-[20px] h-[20px] stroke-current stroke-[2.6] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <span id="cal-header-title" class="font-onest font-semibold text-[18px] text-textWhite capitalize">Март 2026</span>
+            <button id="cal-next-month" aria-label="Следующий месяц" class="p-1 text-accentGreen hover:opacity-80 active:scale-90 transition-transform">
+              <svg class="w-[20px] h-[20px] stroke-current stroke-[2.6] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <div class="h-[10px] shrink-0"></div>
+          <div class="grid grid-cols-7 gap-1 text-center w-full mb-1">
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Пн</div>
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Вт</div>
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Ср</div>
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Чт</div>
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Пт</div>
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Сб</div>
+            <div class="w-full aspect-square flex items-center justify-center font-onest font-medium text-[14px] text-textWhite/40">Вс</div>
+          </div>
+          <div id="calendar-days-container" class="grid grid-cols-7 gap-1 text-center w-full cursor-grab active:cursor-grabbing"></div>
+        </div>
+
+        <div id="home-scroll-area" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(16px + env(safe-area-inset-top, 0px));" class="w-full h-full overflow-y-auto scroll-container no-scrollbar flex flex-col scroll-smooth">
+          
+          <section class="pl-5 pr-2 flex items-center justify-between gap-1.5 relative z-40 shrink-0">
+            <div id="date-slider-container" class="calendar-mask flex-1 overflow-x-auto no-scrollbar py-1 cursor-grab active:cursor-grabbing select-none pr-1">
+              <div id="date-slider-track" class="flex gap-2 items-center pr-2"></div>
+            </div>
+
+            <!-- Кнопка календаря на высочайшем слое z-[100], чтобы никогда не уходить под блюр -->
+            <button id="open-calendar-btn" aria-label="Открыть календарь" class="w-12 h-12 rounded-full bg-cardBg flex items-center justify-center shrink-0 text-textWhite transition-all duration-300 active:scale-95 shadow-lg relative z-[100] ml-[6px]">
+              <svg id="calendar-icon-svg" class="w-5 h-5 fill-none stroke-current stroke-2 transition-colors duration-300 pointer-events-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </button>
+          </section>
+
+          <div class="h-[26px] shrink-0"></div>
+
+          <section class="px-5 shrink-0">
+            <h1 id="selected-date-display" class="font-onest font-bold text-[26px] text-textWhite tracking-tight whitespace-nowrap">
+              06, Мар, 2026
+            </h1>
+          </section>
+
+          <div class="h-[26px] shrink-0"></div>
+
+          <section class="px-5 shrink-0">
+            <button id="edit-norm-btn" class="flex items-center gap-2 text-textWhite/50 hover:text-textWhite transition-colors text-left group">
+              <svg class="w-[21px] h-[21px] fill-none stroke-current stroke-2 shrink-0 group-hover:scale-105 transition-transform" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+              </svg>
+              <span id="norm-text-preview" class="font-onest font-normal text-[15px] underline underline-offset-4 tracking-wide">
+                Ваша норма
+              </span>
+            </button>
+          </section>
+
+          <div class="h-[16px] shrink-0"></div>
+
+          <section class="px-5 flex items-center justify-between shrink-0">
+            <div class="relative w-[214px] h-[193px] shrink-0 flex items-center justify-center">
+              <svg class="w-[214px] h-[193px] overflow-visible" viewBox="0 0 214 193">
+                <path d="M 46 174 A 92 89 0 1 1 168 174" fill="none" stroke="#1E2632" stroke-opacity="0.32" stroke-width="17" stroke-linecap="round"/>
+                <path id="gauge-progress" d="M 46 174 A 92 89 0 1 1 168 174" fill="none" stroke="#94FD17" stroke-width="17" stroke-linecap="round" stroke-dasharray="485" stroke-dashoffset="485" class="transition-all duration-700 ease-out"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center translate-y-[7px] pointer-events-none">
+                <span id="calories-eaten" class="font-rubik font-bold text-[30pt] text-textWhite leading-none">0</span>
+                <span class="font-onest font-normal text-[12pt] text-textWhite/40 leading-none mt-[6px]">Съедено</span>
+              </div>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center translate-y-[7px] select-none">
+              <span id="calories-left" class="font-rubik font-bold text-[30pt] text-textWhite leading-none">0</span>
+              <span class="font-onest font-normal text-[12pt] text-textWhite/40 leading-none mt-[6px]">Осталось</span>
+            </div>
+          </section>
+
+          <div class="h-[16px] shrink-0"></div>
+
+          <section class="px-5 shrink-0 flex justify-center items-center gap-[6px] w-full">
+            <div class="w-[116px] h-[180px] bg-cardBg rounded-[16px] px-[13px] py-[18px] flex flex-col justify-between shrink-0 select-none shadow-sm">
+              <div class="w-[44px] h-[44px] rounded-full bg-iconPlateBg flex items-center justify-center shrink-0">
+                <img src="https://emojigraph.org/media/144/apple/poultry-leg_1f357.png" alt="Белки" class="w-[22px] h-[22px] object-contain pointer-events-none" />
+              </div>
+              <span class="font-onest font-semibold text-[18px] text-textWhite leading-none">Белки</span>
+              <div class="flex flex-col gap-[3px] w-full">
+                <span id="protein-eaten-num" class="font-rubik font-medium text-[12pt] text-accentGreen leading-none">0</span>
+                <div class="w-full h-[10px] bg-trackBg rounded-full overflow-hidden p-0 relative">
+                  <div id="protein-progress-bar" class="h-full bg-accentGreen rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div id="protein-status-wrap" class="flex items-center gap-1.5 leading-none">
+                <span class="font-onest font-normal text-[14px] text-textWhite/20">Ещё</span>
+                <span id="protein-status-val" class="font-rubik font-medium text-[14px] text-textWhite/60">0</span>
+              </div>
+            </div>
+
+            <div class="w-[116px] h-[180px] bg-cardBg rounded-[16px] px-[13px] py-[18px] flex flex-col justify-between shrink-0 select-none shadow-sm">
+              <div class="w-[44px] h-[44px] rounded-full bg-iconPlateBg flex items-center justify-center shrink-0">
+                <img src="https://emojigraph.org/media/144/apple/avocado_1f951.png" alt="Жиры" class="w-[28px] h-[22px] object-contain pointer-events-none" />
+              </div>
+              <span class="font-onest font-semibold text-[18px] text-textWhite leading-none">Жиры</span>
+              <div class="flex flex-col gap-[3px] w-full">
+                <span id="fat-eaten-num" class="font-rubik font-medium text-[12pt] text-accentGreen leading-none">0</span>
+                <div class="w-full h-[10px] bg-trackBg rounded-full overflow-hidden p-0 relative">
+                  <div id="fat-progress-bar" class="h-full bg-accentGreen rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div id="fat-status-wrap" class="flex items-center gap-1.5 leading-none">
+                <span class="font-onest font-normal text-[14px] text-textWhite/20">Ещё</span>
+                <span id="fat-status-val" class="font-rubik font-medium text-[14px] text-textWhite/60">0</span>
+              </div>
+            </div>
+
+            <div class="w-[116px] h-[180px] bg-cardBg rounded-[16px] px-[13px] py-[18px] flex flex-col justify-between shrink-0 select-none shadow-sm">
+              <div class="w-[44px] h-[44px] rounded-full bg-iconPlateBg flex items-center justify-center shrink-0">
+                <img src="https://emojigraph.org/media/144/apple/bread_1f35e.png" alt="Углеводы" class="w-[22px] h-[22px] object-contain pointer-events-none" />
+              </div>
+              <span class="font-onest font-semibold text-[18px] text-textWhite leading-none">Углеводы</span>
+              <div class="flex flex-col gap-[3px] w-full">
+                <span id="carbs-eaten-num" class="font-rubik font-medium text-[12pt] text-accentGreen leading-none">0</span>
+                <div class="w-full h-[10px] bg-trackBg rounded-full overflow-hidden p-0 relative">
+                  <div id="carbs-progress-bar" class="h-full bg-accentGreen rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div id="carbs-status-wrap" class="flex items-center gap-1.5 leading-none">
+                <span class="font-onest font-normal text-[14px] text-textWhite/20">Ещё</span>
+                <span id="carbs-status-val" class="font-rubik font-medium text-[14px] text-textWhite/60">0</span>
+              </div>
+            </div>
+          </section>
+
+          <div id="meals-day-container" class="px-5 mt-[44px] flex flex-col w-full hidden">
+            <div class="w-[357px] mx-auto flex items-center select-none pl-[18px] pr-[42px]">
+              <div class="w-[68px] flex flex-col shrink-0">
+                <span class="font-onest font-medium text-[12px] text-textWhite/40 leading-none">Кал</span>
+                <span id="day-sum-k" class="font-rubik font-semibold text-[16px] text-accentGreen leading-none mt-[12px]">0</span>
+              </div>
+              <div class="w-[68px] flex flex-col shrink-0">
+                <span class="font-onest font-medium text-[12px] text-textWhite/40 leading-none">Бел</span>
+                <span id="day-sum-b" class="font-rubik font-medium text-[16px] text-textWhite leading-none mt-[12px]">0</span>
+              </div>
+              <div class="w-[68px] flex flex-col shrink-0">
+                <span class="font-onest font-medium text-[12px] text-textWhite/40 leading-none">Жир</span>
+                <span id="day-sum-zh" class="font-rubik font-medium text-[16px] text-textWhite leading-none mt-[12px]">0</span>
+              </div>
+              <div class="w-[68px] flex flex-col shrink-0">
+                <span class="font-onest font-medium text-[12px] text-textWhite/40 leading-none">Угли</span>
+                <span id="day-sum-u" class="font-rubik font-medium text-[16px] text-textWhite leading-none mt-[12px]">0</span>
+              </div>
+            </div>
+
+            <div id="meals-accordion-list" class="mt-[24px] flex flex-col gap-[12px] items-center w-full"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ЭКРАН 3: ДНЕВНИК СОХРАНЕНИЙ -->
+      <div id="view-recipes" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <h2 class="font-onest font-medium text-[26px] text-textWhite mb-6 leading-none select-none">Дневник сохранений</h2>
+        <div id="recipes-screen-list" class="flex flex-col gap-[12px] w-full"></div>
+      </div>
+
+      <!-- ЭКРАН 4: ПРОФИЛЬ -->
+      <div id="view-profile" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <div class="flex items-center justify-between w-full shrink-0">
+          <h1 class="font-onest font-medium text-[26px] text-[#E5E5E5] leading-none select-none">Мой профиль</h1>
+          <button id="profile-settings-btn" aria-label="Настройки" class="w-12 h-12 rounded-full bg-[#1E2632] grid place-items-center text-[#E5E5E5] active:scale-95 transition-transform shrink-0 shadow-md">
+            <svg class="w-[21px] h-[21px] stroke-current stroke-[1.8] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="h-[28px] shrink-0"></div>
+
+        <div class="relative w-[140px] h-[140px] mx-auto shrink-0">
+          <div class="w-[140px] h-[140px] rounded-full bg-[#1E2632] overflow-hidden flex items-center justify-center shadow-lg">
+            <img id="profile-avatar-img" src="https://emojigraph.org/media/144/apple/hear-no-evil-monkey_1f649.png" alt="Аватар профиля" class="w-[70px] h-[70px] object-contain pointer-events-none" />
+          </div>
+          <button id="edit-profile-btn" aria-label="Редактировать профиль" class="absolute -top-1.5 -right-1.5 w-[44px] h-[44px] rounded-full bg-[#1E2631] border border-white/10 grid place-items-center text-[#E5E5E5] active:scale-90 transition-all shadow-md z-10">
+            <svg class="w-[17px] h-[17px] stroke-current stroke-[2] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="h-[16px] shrink-0"></div>
+
+        <div class="w-full text-center shrink-0">
+          <span id="profile-user-name" class="font-onest font-medium text-[26px] text-[#E5E5E5] leading-tight block select-none">Чебупелька</span>
+        </div>
+
+        <div class="h-[30px] shrink-0"></div>
+
+        <div class="w-full h-[86px] bg-[#1E2632] rounded-[24px] px-5 flex items-center justify-between shrink-0 shadow-sm">
+          <div class="font-onest font-medium text-[18px] text-[#F0F0F0] leading-[1.25]">
+            <span>Статистика</span><br>
+            <span>за&nbsp;всё&nbsp;время</span>
+          </div>
+          <button id="open-stats-table-btn" class="px-6 py-3 rounded-full border-2 border-accentGreen text-accentGreen font-rubik font-normal text-[16px] leading-none active:scale-95 transition-transform shrink-0 whitespace-nowrap">Таблица</button>
+        </div>
+
+        <div class="h-[30px] shrink-0"></div>
+
+        <div class="font-onest font-medium text-[14px] text-[#F0F0F0]/40 text-center px-4 leading-[1.35] select-none shrink-0">
+          Данные сохраняются в таблицу<br>статистики&nbsp;для полного отчета
+        </div>
+
+        <div class="h-[30px] shrink-0"></div>
+
+        <div id="profile-default-widget-banner" class="w-full bg-[#1E2632] rounded-[24px] p-5 flex flex-col gap-4 shrink-0 shadow-sm border border-white/5">
+          <div class="flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-iconPlateBg flex items-center justify-center shrink-0 text-accentGreen shadow-inner">
+              <svg class="w-[21px] h-[21px] stroke-current stroke-[2] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-onest font-semibold text-[18px] text-[#F0F0F0] leading-tight">Добавьте виджеты</span>
+              <p class="font-onest text-[13px] text-[#F0F0F0]/50 mt-1 leading-snug">Настройте трекинг веса, шагов и заметок&nbsp;для полной статистики в профиле.</p>
+            </div>
+          </div>
+          <button id="add-widgets-btn" class="w-full h-[48px] bg-cardInput rounded-full px-5 flex items-center justify-between border border-white/10 active:scale-[0.98] transition-transform group shadow-inner">
+            <span class="font-onest font-medium text-[14px] text-textWhite group-hover:text-accentGreen transition-colors">Добавить в настройках</span>
+            <svg class="w-4 h-4 stroke-current text-accentGreen stroke-2 fill-none transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+
+        <div id="profile-active-widgets-list" class="flex flex-col gap-3 w-full shrink-0 hidden"></div>
+      </div>
+
+      <!-- ЭКРАН 5: НАСТРОЙКИ -->
+      <div id="view-settings" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <button id="settings-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
+          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
+        </button>
+
+        <div class="h-[30px] shrink-0"></div>
+
+        <div id="settings-account-card-btn" class="w-full h-[93px] bg-cardBg rounded-[16px] p-[20px] flex items-center justify-between shrink-0 shadow-sm cursor-pointer active:bg-white/5 transition-colors">
+          <div class="flex items-center">
+            <div class="w-[53px] h-[53px] rounded-full bg-[#1E2631] overflow-hidden flex items-center justify-center shrink-0 border border-white/5">
+              <img id="settings-avatar-img" src="https://emojigraph.org/media/144/apple/hear-no-evil-monkey_1f649.png" alt="Аватар" class="w-[30px] h-[30px] object-contain pointer-events-none" />
+            </div>
+            <div class="ml-[20px] flex flex-col leading-none">
+              <span id="settings-user-name" class="font-onest font-semibold text-[18px] text-[#F0F0F0] leading-tight">Чебупелька</span>
+              <span class="font-onest font-medium text-[14px] text-[#F0F0F0]/40 mt-[5px]">dsychenikova@list.ru</span>
+            </div>
+          </div>
+          <svg class="w-[18px] h-[18px] stroke-[#E5E5E5]/40 stroke-2 fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div id="settings-goto-widgets-btn" class="w-full bg-cardBg rounded-[16px] py-[24px] px-[18px] flex items-center justify-between shrink-0 shadow-sm cursor-pointer active:bg-white/5 transition-colors">
+          <div class="flex items-center">
+            <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Виджеты</span>
+          </div>
+          <svg class="w-[18px] h-[18px] stroke-[#E5E5E5]/40 stroke-2 fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div class="w-full bg-cardBg rounded-[16px] overflow-hidden flex flex-col shrink-0 shadow-sm divide-y divide-white/5">
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Тёмная тема</span>
+            </div>
+            <button id="theme-toggle-btn" class="ios-switch active"><div class="thumb"></div></button>
+          </div>
+
+          <div id="settings-goto-styling-btn" class="py-[21px] px-[18px] flex items-center justify-between cursor-pointer active:bg-white/5 transition-colors">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle>
+              </svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Оформление</span>
+            </div>
+            <svg class="w-[18px] h-[18px] stroke-[#E5E5E5]/40 stroke-2 fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+
+          <div class="py-[11px] px-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Языки</span>
+            </div>
+            <div id="lang-switch-toggle" class="h-[33px] w-[80px] bg-[#050F1B] rounded-full p-[2.5px] flex items-center relative cursor-pointer border border-white/10 select-none">
+              <div id="lang-indicator" class="absolute w-[37px] h-[28px] bg-white rounded-full transition-transform duration-300 left-[2.5px] shadow-sm"></div>
+              <span id="lang-label-ru" class="relative z-10 w-[37px] text-center font-rubik font-semibold text-[13px] text-[#050F1B] leading-none transition-colors">RU</span>
+              <span id="lang-label-en" class="relative z-10 w-[37px] text-center font-rubik font-normal text-[13px] text-[#E5E5E5] leading-none transition-colors">EN</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div class="w-full bg-cardBg rounded-[16px] p-[18px] flex items-center justify-between shrink-0 shadow-sm">
+          <div class="flex items-center">
+            <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Обратная связь</span>
+          </div>
+          <svg class="w-[18px] h-[18px] stroke-[#E5E5E5]/40 stroke-2 fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div class="w-full bg-cardBg rounded-[16px] p-[18px] flex items-center justify-between shrink-0 shadow-sm">
+          <span class="font-onest font-medium text-[14px] text-[#F0F0F0]/80">Сброс данных</span>
+          <svg class="w-[18px] h-[18px] stroke-[#E5E5E5]/40 stroke-2 fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div class="w-full flex justify-center shrink-0">
+          <button id="settings-logout-btn" class="font-onest font-medium text-[16px] text-accentOrange active:opacity-70 transition-opacity select-none">Выйти</button>
+        </div>
+      </div>
+
+      <!-- ЭКРАН 5.1: ДЕТАЛЬНАЯ СТРАНИЦА АККАУНТА -->
+      <div id="view-account-details" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <button id="account-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
+          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
+        </button>
+
+        <div class="h-[32px] shrink-0"></div>
+        <h2 class="font-onest font-semibold text-[24pt] text-textWhite text-center">Аккаунт</h2>
+
+        <div class="h-[28px] shrink-0"></div>
+        <div class="w-[100px] h-[100px] rounded-full bg-[#1E2632] mx-auto overflow-hidden flex items-center justify-center border border-white/10 shadow-lg">
+          <img id="account-page-avatar" src="https://emojigraph.org/media/144/apple/hear-no-evil-monkey_1f649.png" class="w-[50px] h-[50px] object-contain pointer-events-none" />
+        </div>
+
+        <div class="h-[28px] shrink-0"></div>
+        <div class="w-full bg-cardBg rounded-[16px] overflow-hidden divide-y divide-white/5 shadow-sm">
+          <div class="p-4 flex justify-between items-center">
+            <span class="font-onest text-sm text-textWhite/50">Имя</span>
+            <span id="account-page-name" class="font-onest font-medium text-sm text-textWhite">Чебупелька</span>
+          </div>
+          <div class="p-4 flex justify-between items-center">
+            <span class="font-onest text-sm text-textWhite/50">Почта</span>
+            <span class="font-onest font-medium text-sm text-textWhite">dsychenikova@list.ru</span>
+          </div>
+          <div class="p-4 flex justify-between items-center">
+            <span class="font-onest text-sm text-textWhite/40">ID</span>
+            <span class="font-rubik text-xs text-textWhite/40">#7482910</span>
+          </div>
+          <div class="p-4 flex justify-between items-center">
+            <span class="font-onest text-sm text-textWhite/50">Синхронизация iCloud</span>
+            <span class="font-onest font-medium text-xs text-accentGreen">Включена</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ЭКРАН 6: ВИДЖЕТЫ -->
+      <div id="view-widgets" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <button id="widgets-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
+          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
+        </button>
+
+        <div class="h-[32px] shrink-0"></div>
+        <div class="text-center w-full shrink-0">
+          <h2 class="font-onest font-semibold text-[24pt] text-textWhite leading-tight">Виджеты</h2>
+          <p class="font-onest text-[14px] text-textWhite/40 mt-1.5">Выберите, какие данные отслеживать</p>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+        <div class="w-full bg-cardBg rounded-[16px] overflow-hidden flex flex-col shrink-0 shadow-sm divide-y divide-white/5">
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path><path d="M9 3h6"></path></svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Вес</span>
+            </div>
+            <button data-widget-key="weight" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
+          </div>
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"></circle><path d="M10 22l2-7 3 3v4"></path><path d="M14 13l2-3-4-2-3 4 2 3"></path></svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Шаги</span>
+            </div>
+            <button data-widget-key="steps" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
+          </div>
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5l3.5-7 3 2.5"></path><path d="M5.5 17.5l4-7 4.5 1"></path></svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Активность</span>
+            </div>
+            <button data-widget-key="activity" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
+          </div>
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"></path></svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Прогресс силовых</span>
+            </div>
+            <button data-widget-key="strength" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
+          </div>
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Заметки</span>
+            </div>
+            <button data-widget-key="notes" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
+          </div>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+        <p class="font-onest font-medium text-[14px] text-textWhite/30 text-center select-none">Виджеты будут отображаться в профиле</p>
+      </div>
+
+      <!-- ЭКРАН 7: ОФОРМЛЕНИЕ -->
+      <div id="view-styling" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <button id="styling-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
+          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
+        </button>
+
+        <div class="h-[32px] shrink-0"></div>
+        <h2 class="font-onest font-semibold text-[24pt] text-textWhite leading-tight text-center">Оформление</h2>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div class="w-full bg-[#050F1B] rounded-[24px] p-4 border border-white/10 shadow-lg flex flex-col gap-4 select-none shrink-0 scale-[0.92] origin-top">
+          <div class="flex items-center justify-between">
+            <div class="relative w-[140px] h-[120px] shrink-0 flex items-center justify-center">
+              <svg class="w-[140px] h-[120px] overflow-visible" viewBox="0 0 214 193">
+                <path d="M 46 174 A 92 89 0 1 1 168 174" fill="none" stroke="#1E2632" stroke-opacity="0.4" stroke-width="17" stroke-linecap="round"/>
+                <path id="preview-arc" d="M 46 174 A 92 89 0 1 1 168 174" fill="none" stroke="#94FD17" stroke-width="17" stroke-linecap="round" stroke-dasharray="485" stroke-dashoffset="180"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center translate-y-2 pointer-events-none">
+                <span class="font-rubik font-bold text-xl text-textWhite leading-none">1250</span>
+                <span class="font-onest text-[9px] text-textWhite/40 mt-1">Съедено</span>
+              </div>
+            </div>
+            <div class="flex flex-col items-center justify-center flex-1">
+              <span class="font-rubik font-bold text-xl text-textWhite leading-none">750</span>
+              <span class="font-onest text-[9px] text-textWhite/40 mt-1">Осталось</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 w-full">
+            <div class="bg-cardBg rounded-xl p-2.5 flex flex-col gap-2 items-center">
+              <span class="font-onest text-[11px] text-textWhite font-semibold">Белки</span>
+              <div class="w-full h-2 bg-trackBg rounded-full overflow-hidden">
+                <div id="preview-bar-p" class="h-full bg-accentGreen w-3/4 rounded-full"></div>
+              </div>
+            </div>
+            <div class="bg-cardBg rounded-xl p-2.5 flex flex-col gap-2 items-center">
+              <span class="font-onest text-[11px] text-textWhite font-semibold">Жиры</span>
+              <div class="w-full h-2 bg-trackBg rounded-full overflow-hidden">
+                <div id="preview-bar-f" class="h-full bg-accentGreen w-1/2 rounded-full"></div>
+              </div>
+            </div>
+            <div class="bg-cardBg rounded-xl p-2.5 flex flex-col gap-2 items-center">
+              <span class="font-onest text-[11px] text-textWhite font-semibold">Углеводы</span>
+              <div class="w-full h-2 bg-trackBg rounded-full overflow-hidden">
+                <div id="preview-bar-c" class="h-full bg-accentGreen w-2/3 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-[16px] shrink-0"></div>
+
+        <div class="w-full h-[60px] bg-cardBg rounded-[16px] px-[18px] flex items-center justify-between shrink-0 shadow-sm">
+          <span class="font-onest font-medium text-[14px] text-textWhite/80">Тёмная тема</span>
+          <button id="styling-theme-switch" class="ios-switch active"><div class="thumb"></div></button>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <div class="flex items-center justify-center gap-5 w-full shrink-0">
+          <button data-theme="neon" class="theme-palette-btn w-12 h-12 rounded-full ring-2 ring-white ring-offset-2 ring-offset-appBg bg-gradient-to-tr from-[#94FD17] to-[#FF6434] transition-all transform active:scale-95 shadow-md"></button>
+          <button data-theme="emerald" class="theme-palette-btn w-12 h-12 rounded-full ring-0 ring-white ring-offset-2 ring-offset-appBg bg-gradient-to-tr from-[#00F5A0] to-[#00D9F5] transition-all transform active:scale-95 shadow-md"></button>
+          <button data-theme="sunset" class="theme-palette-btn w-12 h-12 rounded-full ring-0 ring-white ring-offset-2 ring-offset-appBg bg-gradient-to-tr from-[#FF0844] to-[#FFB199] transition-all transform active:scale-95 shadow-md"></button>
+          <button data-theme="cyber" class="theme-palette-btn w-12 h-12 rounded-full ring-0 ring-white ring-offset-2 ring-offset-appBg bg-gradient-to-tr from-[#8A2387] to-[#E94057] transition-all transform active:scale-95 shadow-md"></button>
+        </div>
+
+        <div class="h-[36px] shrink-0"></div>
+
+        <button id="save-styling-btn" class="w-full h-[52px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[15px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">Сохранить</button>
+      </div>
+
+    </main>
+
+    <!-- ПОЛНОЭКРАННАЯ ШТОРКА ДОБАВЛЕНИЯ БЛЮД -->
+    <div id="meals-builder-curtain" class="slide-curtain hidden-curtain absolute inset-0 bg-appBg z-50 flex flex-col overflow-hidden">
+      <div style="padding-top: calc(16px + env(safe-area-inset-bottom, 0px));" class="w-full px-5 flex justify-end shrink-0">
+        <button id="close-curtain-btn" aria-label="Закрыть" class="text-textWhite/30 hover:text-textWhite p-2 transition-colors">
+          <svg class="w-6 h-6 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div id="curtain-scroll-container" class="flex-1 w-full overflow-y-auto scroll-container no-scrollbar px-5 pb-6">
+        <div class="h-[12px] shrink-0"></div>
+        <div id="templates-stack" class="flex flex-col w-full"></div>
+
+        <div class="w-full h-[1px] bg-white opacity-[0.05] mt-[20px] mb-[16px] shrink-0"></div>
+
+        <div id="templates-limit-msg" class="limit-warning-box flex items-center justify-center text-accentOrange font-onest font-medium text-[13px] pointer-events-none">
+          Слишком много шаблонов
+        </div>
+
+        <div class="flex items-center justify-center gap-[10px] w-full shrink-0 mt-[8px]">
+          <button id="templates-doc-btn" class="w-[44px] h-[44px] rounded-full bg-textWhite flex items-center justify-center text-appBg shadow-md active:scale-95 transition-transform" title="Сохраненные продукты">
+            <i class="bi bi-file-earmark-text text-[18px]"></i>
+          </button>
+          <button id="add-template-row-btn" class="w-[44px] h-[44px] rounded-full bg-accentOrange flex items-center justify-center text-white shadow-md active:scale-95 transition-transform" title="Добавить шаблон">
+            <div id="plus-icon-holder" class="btn-icon-wrapper flex items-center justify-center">
+              <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div style="padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));" class="w-full bg-cardBg rounded-t-[24px] pt-5 px-5 shadow-2xl flex flex-col shrink-0 border-t border-white/5 z-20">
+        <div class="flex items-center justify-center gap-[28px] select-none">
+          <div class="flex items-baseline gap-1">
+            <span id="curtain-total-k" class="font-rubik font-medium text-[16px] text-textWhite transition-all">0</span>
+            <span class="font-rubik font-normal text-[12px] text-textWhite/30">ккал</span>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span id="curtain-total-b" class="font-rubik font-medium text-[16px] text-textWhite transition-all">0</span>
+            <span class="font-rubik font-normal text-[12px] text-textWhite/30">бел</span>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span id="curtain-total-zh" class="font-rubik font-medium text-[16px] text-textWhite transition-all">0</span>
+            <span class="font-rubik font-normal text-[12px] text-textWhite/30">жир</span>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span id="curtain-total-u" class="font-rubik font-medium text-[16px] text-textWhite transition-all">0</span>
+            <span class="font-rubik font-normal text-[12px] text-textWhite/30">угли</span>
+          </div>
+        </div>
+
+        <div class="h-[18px] shrink-0"></div>
+
+        <button id="curtain-save-all-btn" class="w-full h-[50px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">
+          Сохранить
+        </button>
+      </div>
+    </div>
+
+    <!-- ШТОРКА ДЛЯ СОХРАНЕННЫХ ПРОДУКТОВ -->
+    <div id="saved-products-sheet" class="ios-sheet sheet-hidden absolute inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-sm">
+      <div id="saved-sheet-content" class="w-full h-[75%] bg-cardBg rounded-t-[32px] pt-0 px-6 pb-6 flex flex-col shadow-2xl border-t border-white/10 relative overflow-hidden select-none">
+        
+        <div id="sheet-drag-handle" class="w-full flex flex-col items-center justify-center shrink-0 cursor-grab active:cursor-grabbing" style="height: 34px;">
+          <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto"></div>
+        </div>
+
+        <div class="relative w-full flex items-center justify-center shrink-0" style="margin-top: 10px; height: 28px;">
+          <h3 class="font-onest font-semibold text-[20px] text-textWhite text-center leading-none">Выбрать из дневника</h3>
+          <button id="close-saved-sheet-btn" class="absolute right-0 text-textWhite/60 hover:text-textWhite active:scale-90 transition-all p-2 -mr-2" style="top: 50%; transform: translateY(-50%);">
+            <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div id="saved-products-list" class="flex-1 overflow-y-auto scroll-container no-scrollbar flex flex-col gap-[10px] pb-6" style="margin-top: 22px;"></div>
+      </div>
+    </div>
+
+    <!-- ПОПАПЫ -->
+    <div id="edit-saved-product-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+      <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
+        <button id="close-edit-saved-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
+          <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <h3 class="font-onest font-bold text-xl text-textWhite mb-5">Редактировать продукт</h3>
+        <div class="flex flex-col gap-4 mb-6">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-onest text-xs text-textWhite/50 px-1">Название</label>
+            <input id="edit-saved-name-input" type="text" maxlength="30" class="w-full h-[48px] bg-[#293342] rounded-xl px-4 font-onest text-[16px] text-textWhite focus:outline-none border-none" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-onest text-xs text-textWhite/50 px-1">КБЖУ на 100 гр</label>
+            <div class="grid grid-cols-4 gap-2">
+              <input id="edit-saved-k-input" type="text" inputmode="decimal" placeholder="К" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-b-input" type="text" inputmode="decimal" placeholder="Б" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-zh-input" type="text" inputmode="decimal" placeholder="Ж" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-u-input" type="text" inputmode="decimal" placeholder="У" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button id="delete-saved-product-btn" class="w-[52px] h-[52px] rounded-full bg-overRed/20 text-overRed flex items-center justify-center active:scale-[0.98] transition-transform shrink-0">
+            <i class="bi bi-trash3 text-lg"></i>
+          </button>
+          <button id="save-edited-saved-product-btn" class="flex-1 h-[52px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">Сохранить</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="edit-history-product-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+      <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
+        <button id="close-edit-history-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
+          <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <h3 class="font-onest font-bold text-xl text-textWhite mb-5">Редактировать блюдо</h3>
+        <div class="flex flex-col gap-4 mb-6">
+          <div class="flex items-end gap-[6px] w-full">
+            <div class="flex flex-col flex-1">
+              <span class="font-onest font-normal text-[12px] text-textWhite/50 mb-1">Название</span>
+              <input id="edit-history-name-input" type="text" maxlength="30" class="w-full h-[48px] bg-[#293342] rounded-xl px-4 font-onest text-[16px] text-textWhite focus:outline-none border-none" />
+            </div>
+            <div class="flex flex-col w-[90px]">
+              <span class="font-onest font-normal text-[12px] text-textWhite/50 mb-1">Вес</span>
+              <input id="edit-history-weight-input" type="text" inputmode="decimal" placeholder="гр/мл" class="w-full h-[48px] bg-[#293342] rounded-xl text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/30 focus:outline-none border-none" />
+            </div>
+          </div>
+
+          <div class="flex flex-col w-full">
+            <span class="font-onest font-normal text-[12px] text-textWhite/50 mb-2">КБЖУ на 100 гр/мл</span>
+            <div class="grid grid-cols-4 gap-2">
+              <input id="edit-history-k100-input" type="text" inputmode="decimal" placeholder="К" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-b100-input" type="text" inputmode="decimal" placeholder="Б" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-zh100-input" type="text" inputmode="decimal" placeholder="Ж" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-u100-input" type="text" inputmode="decimal" placeholder="У" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 mt-[10px]">
+              <div class="flex items-center justify-center gap-1">
+                <span id="edit-history-calc-k" class="font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+                <span class="font-rubik font-medium text-[12px] text-textWhite/30">к</span>
+              </div>
+              <div class="flex items-center justify-center gap-1">
+                <span id="edit-history-calc-b" class="font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+                <span class="font-rubik font-medium text-[12px] text-textWhite/30">б</span>
+              </div>
+              <div class="flex items-center justify-center gap-1">
+                <span id="edit-history-calc-zh" class="font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+                <span class="font-rubik font-medium text-[12px] text-textWhite/30">ж</span>
+              </div>
+              <div class="flex items-center justify-center gap-1">
+                <span id="edit-history-calc-u" class="font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+                <span class="font-rubik font-medium text-[12px] text-textWhite/30">у</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button id="delete-history-product-btn" class="w-[52px] h-[52px] rounded-full bg-overRed/20 text-overRed flex items-center justify-center active:scale-[0.98] transition-transform shrink-0">
+            <i class="bi bi-trash3 text-lg"></i>
+          </button>
+          <button id="save-edited-history-product-btn" class="flex-1 h-[52px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">Сохранить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dock-blur-underlay" style="bottom: 8px;"></div>
+    <nav class="dock-container" style="padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));">
+      <div class="dock-wrapper">
+        <button id="nav-btn-home" class="dock-btn active" title="Главная"><i class="bi bi-house"></i></button>
+
+        <div class="hero-slot">
+          <button id="nav-btn-add" class="plus-hero-btn" title="Добавить блюдо">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="4" x2="12" y2="20"></line>
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+
+        <button id="nav-btn-recipes" class="dock-btn" title="Дневник сохранений"><i class="bi bi-file-earmark-text"></i></button>
+        <button id="nav-btn-profile" class="dock-btn" title="Профиль"><i class="bi bi-person"></i></button>
+      </div>
+    </nav>
+
+    <div id="norm-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+      <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
+        <button id="close-norm-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
+          <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <h3 class="font-onest font-bold text-xl text-textWhite mb-1">Норма КБЖУ</h3>
+        <p class="font-onest text-sm text-textWhite/60 mb-6">Введите вашу норму КБЖУ</p>
+        <div class="grid grid-cols-4 gap-1 w-full mb-6">
+          <div id="norm-box-k" class="relative h-[50px] bg-[#293342] rounded-[14px] flex items-center justify-center overflow-hidden transition-all">
+            <span id="placeholder-k" class="absolute font-onest font-medium text-[16px] text-[#F0F0F0]/40 pointer-events-none">К</span>
+            <input id="input-k" type="number" inputmode="numeric" class="w-full h-full bg-transparent text-center font-rubik font-semibold text-lg text-textWhite focus:outline-none z-10" />
+          </div>
+          <div id="norm-box-b" class="relative h-[50px] bg-[#293342] rounded-[14px] flex items-center justify-center overflow-hidden transition-all">
+            <span id="placeholder-b" class="absolute font-onest font-medium text-[16px] text-[#F0F0F0]/40 pointer-events-none">Б</span>
+            <input id="input-b" type="number" inputmode="numeric" class="w-full h-full bg-transparent text-center font-rubik font-semibold text-lg text-textWhite focus:outline-none z-10" />
+          </div>
+          <div id="norm-box-zh" class="relative h-[50px] bg-[#293342] rounded-[14px] flex items-center justify-center overflow-hidden transition-all">
+            <span id="placeholder-zh" class="absolute font-onest font-medium text-[16px] text-[#F0F0F0]/40 pointer-events-none">Ж</span>
+            <input id="input-zh" type="number" inputmode="numeric" class="w-full h-full bg-transparent text-center font-rubik font-semibold text-lg text-textWhite focus:outline-none z-10" />
+          </div>
+          <div id="norm-box-u" class="relative h-[50px] bg-[#293342] rounded-[14px] flex items-center justify-center overflow-hidden transition-all">
+            <span id="placeholder-u" class="absolute font-onest font-medium text-[16px] text-[#F0F0F0]/40 pointer-events-none">У</span>
+            <input id="input-u" type="number" inputmode="numeric" class="w-full h-full bg-transparent text-center font-rubik font-semibold text-lg text-textWhite focus:outline-none z-10" />
+          </div>
+        </div>
+        <button id="save-norm-btn" class="w-full h-[52px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">Сохранить</button>
+      </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+      <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
+        <button id="close-profile-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
+          <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <h3 class="font-onest font-bold text-xl text-textWhite mb-5">Редактировать профиль</h3>
+        <div class="flex flex-col gap-4 mb-6">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-onest text-xs text-textWhite/50 px-1">Фотография</label>
+            <input id="profile-file-input" type="file" accept="image/*" class="hidden" />
+            <button id="trigger-upload-btn" type="button" class="w-full h-[48px] bg-cardInput rounded-xl px-4 flex items-center justify-center gap-2 border border-white/5 text-textWhite/80 font-onest text-sm active:scale-[0.99] transition-transform">
+              <i class="bi bi-image"></i>
+              <span>Выбрать из галереи</span>
+            </button>
+          </div>
+          <div id="photo-crop-preview-container" class="hidden flex flex-col items-center gap-2 mt-2">
+            <span class="font-onest text-xs text-textWhite/50">Настройте масштаб фото</span>
+            <div class="relative w-24 h-24 rounded-full overflow-hidden border-2 border-accentGreen shadow-inner bg-black">
+              <img id="crop-image-preview" src="" class="absolute max-none cursor-grab active:cursor-grabbing origin-center select-none" style="width: 100%; height: auto; transform: scale(1); left: 0px; top: 0px;" />
+            </div>
+            <input id="photo-scale-range" type="range" min="0.5" max="3" step="0.05" value="1" class="w-48 accent-accentGreen mt-1" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-onest text-xs text-textWhite/50 px-1">Ваше имя</label>
+            <input id="edit-profile-name-input" type="text" maxlength="26" placeholder="Введите имя" class="w-full h-[48px] bg-cardInput rounded-xl px-4 font-onest text-[16px] text-textWhite placeholder:text-textWhite/40 focus:outline-none border border-white/5" />
+          </div>
+        </div>
+        <button id="save-profile-btn" class="w-full h-[52px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">Сохранить</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    function getRussiaToday() {
+      try {
+        const now = new Date();
+        const mskString = now.toLocaleString("en-US", { timeZone: "Europe/Moscow" });
+        return new Date(mskString);
+      } catch (e) {
+        return new Date();
+      }
+    }
+
+    const REAL_TODAY = getRussiaToday();
+    let selectedDate = new Date(REAL_TODAY);
+    let viewMonthDate = new Date(REAL_TODAY);
+    let isCalendarOpen = false;
+
+    const historicalNormsStore = {};
+    const dayDataStore = {};
+    const globalSavedProductsDatabase = {};
+
+    function getDateKey(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getUserNormForDate(dateObj) {
+      const targetTime = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+      const sortedKeys = Object.keys(historicalNormsStore).sort();
+      let activeNorm = { calories: 0, protein: 0, fat: 0, carbs: 0, isSet: false };
+
+      for (const k of sortedKeys) {
+        const parts = k.split('-');
+        const normTime = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])).getTime();
+        if (normTime <= targetTime) {
+          activeNorm = historicalNormsStore[k];
+        } else {
+          break;
+        }
+      }
+      return activeNorm;
+    }
+
+    function getDayMetrics(dateObj) {
+      const key = getDateKey(dateObj);
+      if (!dayDataStore[key]) {
+        dayDataStore[key] = { calories: 0, protein: 0, fat: 0, carbs: 0, meals: [] };
+      }
+      return dayDataStore[key];
+    }
+
+    const MONTHS_SHORT = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+    const MONTHS_FULL = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    const WEEKDAYS_SHORT = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+    const GAUGE_PATH_LENGTH = 485;
+
+    function updateMetrics() {
+      const eatenData = getDayMetrics(selectedDate);
+      const currentDayNorm = getUserNormForDate(selectedDate);
+
+      document.getElementById('calories-eaten').textContent = eatenData.calories;
+
+      if (!currentDayNorm.isSet) {
+        document.getElementById('calories-left').textContent = '0';
+        const gaugeElem = document.getElementById('gauge-progress');
+        gaugeElem.style.strokeDashoffset = GAUGE_PATH_LENGTH;
+        gaugeElem.setAttribute('stroke', '#94FD17');
+
+        updateMacroCard('protein', eatenData.protein, 0, false);
+        updateMacroCard('fat', eatenData.fat, 0, false);
+        updateMacroCard('carbs', eatenData.carbs, 0, false);
+      } else {
+        const caloriesLeft = Math.max(0, currentDayNorm.calories - eatenData.calories);
+        document.getElementById('calories-left').textContent = caloriesLeft;
+
+        const progressRatio = Math.min(1, eatenData.calories / (currentDayNorm.calories || 1));
+        const targetOffset = GAUGE_PATH_LENGTH * (1 - progressRatio);
+        const gaugeElem = document.getElementById('gauge-progress');
+        gaugeElem.style.strokeDashoffset = targetOffset;
+
+        if (eatenData.calories > currentDayNorm.calories) {
+          gaugeElem.setAttribute('stroke', '#FD5B71');
+        } else {
+          gaugeElem.setAttribute('stroke', '#94FD17');
+        }
+
+        updateMacroCard('protein', eatenData.protein, currentDayNorm.protein, true);
+        updateMacroCard('fat', eatenData.fat, currentDayNorm.fat, true);
+        updateMacroCard('carbs', eatenData.carbs, currentDayNorm.carbs, true);
+      }
+
+      renderMealsHistory();
+    }
+
+    function updateMacroCard(type, eaten, norm, isNormSet) {
+      const numElem = document.getElementById(`${type}-eaten-num`);
+      numElem.textContent = eaten;
+
+      const barElem = document.getElementById(`${type}-progress-bar`);
+      const wrapElem = document.getElementById(`${type}-status-wrap`);
+
+      if (!isNormSet) {
+        barElem.style.width = '0%';
+        barElem.style.backgroundColor = '#94FD17';
+        wrapElem.innerHTML = `<span class="font-onest font-normal text-[14px] text-textWhite/20">Ещё</span><span class="font-rubik font-medium text-[14px] text-textWhite/60">0</span>`;
+        return;
+      }
+
+      const ratio = norm > 0 ? Math.min(100, Math.round((eaten / norm) * 100)) : 0;
+      barElem.style.width = `${ratio}%`;
+      barElem.style.backgroundColor = '#94FD17';
+
+      if (eaten > norm) {
+        const overValue = eaten - norm;
+        wrapElem.innerHTML = `
+          <svg class="w-3.5 h-3.5 stroke-[#FD5B71] stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+          </svg>
+          <span class="font-rubik font-medium text-[14px] text-overRed">+${overValue}</span>
+        `;
+      } else {
+        const leftValue = Math.max(0, norm - eaten);
+        wrapElem.innerHTML = `<span class="font-onest font-normal text-[14px] text-textWhite/20">Ещё</span><span class="font-rubik font-medium text-[14px] text-textWhite/60">${leftValue}</span>`;
+      }
+    }
+
+    function updateDateDisplay() {
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const month = MONTHS_SHORT[selectedDate.getMonth()];
+      const year = selectedDate.getFullYear();
+      document.getElementById('selected-date-display').textContent = `${day}, ${month}, ${year}`;
+
+      const activeNorm = getUserNormForDate(selectedDate);
+      if (activeNorm.isSet) {
+        document.getElementById('norm-text-preview').textContent = `${activeNorm.calories}/${activeNorm.protein}/${activeNorm.fat}/${activeNorm.carbs}`;
+      } else {
+        document.getElementById('norm-text-preview').textContent = 'Ваша норма';
+      }
+    }
+
+    let currentEditingMealIndex = null;
+    let currentEditingItemIndex = null;
+    const editHistoryProductModal = document.getElementById('edit-history-product-modal');
+    const closeEditHistoryModalBtn = document.getElementById('close-edit-history-modal-btn');
+    const editHistoryNameInput = document.getElementById('edit-history-name-input');
+    const editHistoryWeightInput = document.getElementById('edit-history-weight-input');
+    const editHistoryK100Input = document.getElementById('edit-history-k100-input');
+    const editHistoryB100Input = document.getElementById('edit-history-b100-input');
+    const editHistoryZh100Input = document.getElementById('edit-history-zh100-input');
+    const editHistoryU100Input = document.getElementById('edit-history-u100-input');
+    const saveEditedHistoryProductBtn = document.getElementById('save-edited-history-product-btn');
+    const deleteHistoryProductBtn = document.getElementById('delete-history-product-btn');
+
+    closeEditHistoryModalBtn.addEventListener('click', () => {
+      editHistoryProductModal.classList.remove('modal-active');
+    });
+
+    function recalcHistoryEditModal() {
+      const w = parseFloat(editHistoryWeightInput.value.replace(',', '.')) || 0;
+      const k100 = parseFloat(editHistoryK100Input.value.replace(',', '.')) || 0;
+      const b100 = parseFloat(editHistoryB100Input.value.replace(',', '.')) || 0;
+      const zh100 = parseFloat(editHistoryZh100Input.value.replace(',', '.')) || 0;
+      const u100 = parseFloat(editHistoryU100Input.value.replace(',', '.')) || 0;
+
+      const calcK = Math.round((k100 * w) / 100);
+      const calcB = Math.round(((b100 * w) / 100) * 10) / 10;
+      const calcZh = Math.round(((zh100 * w) / 100) * 10) / 10;
+      const calcU = Math.round(((u100 * w) / 100) * 10) / 10;
+
+      document.getElementById('edit-history-calc-k').textContent = calcK;
+      document.getElementById('edit-history-calc-b').textContent = String(calcB).replace('.', ',');
+      document.getElementById('edit-history-calc-zh').textContent = String(calcZh).replace('.', ',');
+      document.getElementById('edit-history-calc-u').textContent = String(calcU).replace('.', ',');
+    }
+
+    [editHistoryWeightInput, editHistoryK100Input, editHistoryB100Input, editHistoryZh100Input, editHistoryU100Input].forEach(inp => {
+      inp.addEventListener('input', recalcHistoryEditModal);
+    });
+
+    saveEditedHistoryProductBtn.addEventListener('click', () => {
+      if (currentEditingMealIndex === null || currentEditingItemIndex === null) return;
+      const dayData = getDayMetrics(selectedDate);
+      const meal = dayData.meals[currentEditingMealIndex];
+      const item = meal.items[currentEditingItemIndex];
+
+      const newName = editHistoryNameInput.value.trim() || 'Продукт';
+      const newWeight = parseFloat(editHistoryWeightInput.value.replace(',', '.')) || 0;
+      const k100 = editHistoryK100Input.value.trim() || '0';
+      const b100 = editHistoryB100Input.value.trim() || '0';
+      const zh100 = editHistoryZh100Input.value.trim() || '0';
+      const u100 = editHistoryU100Input.value.trim() || '0';
+
+      const w = newWeight;
+      const calcK = Math.round((parseFloat(k100.replace(',','.')) * w) / 100);
+      const calcB = Math.round(((parseFloat(b100.replace(',','.')) * w) / 100) * 10) / 10;
+      const calcZh = Math.round(((parseFloat(zh100.replace(',','.')) * w) / 100) * 10) / 10;
+      const calcU = Math.round(((parseFloat(u100.replace(',','.')) * w) / 100) * 10) / 10;
+
+      item.name = newName;
+      item.weight = newWeight;
+      item.k100 = k100;
+      item.b100 = b100;
+      item.zh100 = zh100;
+      item.u100 = u100;
+      item.k = calcK;
+      item.b = String(calcB).replace('.', ',');
+      item.zh = String(calcZh).replace('.', ',');
+      item.u = String(calcU).replace('.', ',');
+
+      let sumK = 0, sumB = 0, sumZh = 0, sumU = 0;
+      meal.items.forEach(it => {
+        sumK += parseFloat(String(it.k).replace(',', '.')) || 0;
+        sumB += parseFloat(String(it.b).replace(',', '.')) || 0;
+        sumZh += parseFloat(String(it.zh).replace(',', '.')) || 0;
+        sumU += parseFloat(String(it.u).replace(',', '.')) || 0;
+      });
+      meal.totalK = Math.round(sumK);
+      meal.totalB = String(Math.round(sumB * 10) / 10).replace('.', ',');
+      meal.totalZh = String(Math.round(sumZh * 10) / 10).replace('.', ',');
+      meal.totalU = String(Math.round(sumU * 10) / 10).replace('.', ',');
+
+      let dayK = 0, dayB = 0, dayZh = 0, dayU = 0;
+      dayData.meals.forEach(m => {
+        dayK += parseFloat(String(m.totalK).replace(',', '.')) || 0;
+        dayB += parseFloat(String(m.totalB).replace(',', '.')) || 0;
+        dayZh += parseFloat(String(m.totalZh).replace(',', '.')) || 0;
+        dayU += parseFloat(String(m.totalU).replace(',', '.')) || 0;
+      });
+      dayData.calories = Math.round(dayK);
+      dayData.protein = Math.round(dayB);
+      dayData.fat = Math.round(dayZh);
+      dayData.carbs = Math.round(dayU);
+
+      editHistoryProductModal.classList.remove('modal-active');
+      updateMetrics();
+    });
+
+    deleteHistoryProductBtn.addEventListener('click', () => {
+      if (currentEditingMealIndex === null || currentEditingItemIndex === null) return;
+      const dayData = getDayMetrics(selectedDate);
+      const meal = dayData.meals[currentEditingMealIndex];
+
+      meal.items.splice(currentEditingItemIndex, 1);
+      if (meal.items.length === 0) {
+        dayData.meals.splice(currentEditingMealIndex, 1);
+      } else {
+        let sumK = 0, sumB = 0, sumZh = 0, sumU = 0;
+        meal.items.forEach(it => {
+          sumK += parseFloat(String(it.k).replace(',', '.')) || 0;
+          sumB += parseFloat(String(it.b).replace(',', '.')) || 0;
+          sumZh += parseFloat(String(it.zh).replace(',', '.')) || 0;
+          sumU += parseFloat(String(it.u).replace(',', '.')) || 0;
+        });
+        meal.totalK = Math.round(sumK);
+        meal.totalB = String(Math.round(sumB * 10) / 10).replace('.', ',');
+        meal.totalZh = String(Math.round(sumZh * 10) / 10).replace('.', ',');
+        meal.totalU = String(Math.round(sumU * 10) / 10).replace('.', ',');
+      }
+
+      let dayK = 0, dayB = 0, dayZh = 0, dayU = 0;
+      dayData.meals.forEach(m => {
+        dayK += parseFloat(String(m.totalK).replace(',', '.')) || 0;
+        dayB += parseFloat(String(m.totalB).replace(',', '.')) || 0;
+        dayZh += parseFloat(String(m.totalZh).replace(',', '.')) || 0;
+        dayU += parseFloat(String(m.totalU).replace(',', '.')) || 0;
+      });
+      dayData.calories = Math.round(dayK);
+      dayData.protein = Math.round(dayB);
+      dayData.fat = Math.round(dayZh);
+      dayData.carbs = Math.round(dayU);
+
+      editHistoryProductModal.classList.remove('modal-active');
+      updateMetrics();
+    });
+
+    function renderMealsHistory() {
+      const dayData = getDayMetrics(selectedDate);
+      const container = document.getElementById('meals-day-container');
+      const list = document.getElementById('meals-accordion-list');
+
+      if (!dayData.meals || dayData.meals.length === 0) {
+        container.classList.add('hidden');
+        list.innerHTML = '';
+        return;
+      }
+
+      container.classList.remove('hidden');
+      document.getElementById('day-sum-k').textContent = dayData.calories;
+      document.getElementById('day-sum-b').textContent = dayData.protein;
+      document.getElementById('day-sum-zh').textContent = dayData.fat;
+      document.getElementById('day-sum-u').textContent = dayData.carbs;
+
+      list.innerHTML = '';
+
+      dayData.meals.forEach((meal, mealIdx) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'w-[357px] flex flex-col transition-all meal-accordion-item';
+
+        const header = document.createElement('div');
+        header.className = 'w-[357px] min-h-[68px] bg-cardBg rounded-[16px] px-[18px] py-3 flex items-center justify-between cursor-pointer shadow-sm select-none transition-all duration-300';
+        header.innerHTML = `
+          <div class="flex items-center">
+            <span class="w-[68px] font-rubik font-bold text-[14px] text-accentGreen leading-none shrink-0">${meal.totalK}</span>
+            <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite leading-none shrink-0">${meal.totalB}</span>
+            <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite leading-none shrink-0">${meal.totalZh}</span>
+            <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite leading-none shrink-0">${meal.totalU}</span>
+          </div>
+          <svg class="meal-chevron w-[24px] h-[24px] stroke-accentGreen stroke-2 fill-none transition-transform duration-500 ease-in-out" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        `;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'meal-accordion-wrapper w-[357px]';
+
+        const body = document.createElement('div');
+        body.className = 'meal-accordion-body w-[357px] bg-[#151E29] rounded-b-[16px] px-[18px] flex flex-col gap-2.5 pt-0 pb-0';
+
+        const innerContent = document.createElement('div');
+        innerContent.className = 'py-3 flex flex-col gap-2.5';
+
+        meal.items.forEach((item, itemIdx) => {
+          let displayName = item.name;
+          if (displayName.length > 25) {
+            displayName = displayName.slice(0, 22) + '...';
+          }
+
+          const itemRow = document.createElement('div');
+          itemRow.className = 'w-full py-2 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity';
+          itemRow.innerHTML = `
+            <div class="flex flex-col gap-[15px] flex-1">
+              <div class="flex items-center gap-[10px]">
+                <span class="h-[24px] px-2.5 rounded-md bg-accentOrange/10 text-[#FF8762] font-rubik font-medium text-[12px] flex items-center justify-center leading-none">${item.weight} гр</span>
+                <span class="font-onest font-medium text-[16px] text-textWhite leading-tight">${displayName}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite/40 leading-none shrink-0">${item.k}</span>
+                <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite/40 leading-none shrink-0">${item.b}</span>
+                <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite/40 leading-none shrink-0">${item.zh}</span>
+                <span class="w-[68px] font-rubik font-medium text-[14px] text-textWhite/40 leading-none shrink-0">${item.u}</span>
+              </div>
+            </div>
+            <div class="w-[24px] h-[24px] flex items-center justify-center text-textWhite/40 ml-2 shrink-0">
+              <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          `;
+
+          itemRow.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentEditingMealIndex = mealIdx;
+            currentEditingItemIndex = itemIdx;
+            editHistoryNameInput.value = item.name;
+            editHistoryWeightInput.value = item.weight;
+            editHistoryK100Input.value = item.k100 || '0';
+            editHistoryB100Input.value = item.b100 || '0';
+            editHistoryZh100Input.value = item.zh100 || '0';
+            editHistoryU100Input.value = item.u100 || '0';
+            recalcHistoryEditModal();
+            editHistoryProductModal.classList.add('modal-active');
+          });
+
+          innerContent.appendChild(itemRow);
+
+          if (itemIdx < meal.items.length - 1) {
+            const divider = document.createElement('div');
+            divider.className = 'w-[321px] h-[1px] bg-[#1E2631] mx-auto my-1 shrink-0';
+            innerContent.appendChild(divider);
+          }
+        });
+
+        body.appendChild(innerContent);
+        wrapper.appendChild(body);
+
+        header.addEventListener('click', () => {
+          const isCurrentlyOpen = wrapper.classList.contains('open');
+
+          document.querySelectorAll('.meal-accordion-item').forEach(otherWrap => {
+            const otherHeader = otherWrap.querySelector('div:first-child');
+            const otherWrapper = otherWrap.querySelector('.meal-accordion-wrapper');
+            const otherChevron = otherHeader.querySelector('.meal-chevron');
+            if (otherWrapper && otherWrapper.classList.contains('open') && otherWrapper !== wrapper) {
+              otherWrapper.classList.remove('open');
+              otherHeader.classList.remove('rounded-b-none');
+              if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
+            }
+          });
+
+          if (!isCurrentlyOpen) {
+            wrapper.classList.add('open');
+            header.classList.add('rounded-b-none');
+            header.querySelector('.meal-chevron').style.transform = 'rotate(180deg)';
+
+            setTimeout(() => {
+              const homeView = document.getElementById('home-scroll-area');
+              const rect = wrapper.getBoundingClientRect();
+              const bottomMenuTop = window.innerHeight - 150;
+              if (rect.bottom > bottomMenuTop) {
+                const overflowOffset = rect.bottom - bottomMenuTop + 24;
+                homeView.scrollBy({ top: overflowOffset, behavior: 'smooth' });
+              }
+            }, 250);
+          } else {
+            wrapper.classList.remove('open');
+            header.classList.remove('rounded-b-none');
+            header.querySelector('.meal-chevron').style.transform = 'rotate(0deg)';
+          }
+        });
+
+        wrap.appendChild(header);
+        wrap.appendChild(wrapper);
+        list.appendChild(wrap);
+      });
+    }
+
+    function renderDateSlider(centerTarget = false) {
+      const track = document.getElementById('date-slider-track');
+      track.innerHTML = '';
+
+      const sliderDates = [];
+      for (let i = -14; i <= 14; i++) {
+        const d = new Date(selectedDate);
+        d.setDate(selectedDate.getDate() + i);
+        sliderDates.push(d);
+      }
+
+      sliderDates.forEach(date => {
+        const isSelected = date.toDateString() === selectedDate.toDateString();
+        const isFuture = date > REAL_TODAY;
+        const isPastOrToday = !isFuture;
+
+        const weekday = WEEKDAYS_SHORT[date.getDay()];
+        const dayNum = String(date.getDate()).padStart(2, '0');
+
+        const card = document.createElement('button');
+        card.className = `date-card flex flex-col items-center justify-center w-[47px] h-[72px] py-2 px-1 rounded-[14px] shrink-0 font-rubik cursor-pointer select-none focus:outline-none `;
+
+        if (isSelected && !isFuture) {
+          card.className += 'active-selected bg-accentOrange text-textWhite shadow-lg shadow-accentOrange/30';
+          card.innerHTML = `<span class="text-xs uppercase font-normal leading-none mb-[7px] pointer-events-none">${weekday}</span><span class="text-[17px] font-semibold leading-none pointer-events-none">${dayNum}</span>`;
+        } else if (isSelected && isFuture) {
+          card.className += 'active-selected bg-transparent border-2 border-accentOrange text-textWhite/30';
+          card.innerHTML = `<span class="text-xs uppercase font-normal leading-none mb-[7px] pointer-events-none">${weekday}</span><span class="text-[17px] font-semibold leading-none pointer-events-none">${dayNum}</span>`;
+        } else if (isPastOrToday) {
+          card.className += 'bg-transparent text-textWhite';
+          card.innerHTML = `<span class="text-xs uppercase text-textWhite/60 font-normal leading-none mb-[7px] pointer-events-none">${weekday}</span><span class="text-[17px] font-medium leading-none pointer-events-none">${dayNum}</span>`;
+        } else {
+          card.className += 'bg-transparent text-textWhite/25';
+          card.innerHTML = `<span class="text-xs uppercase font-normal leading-none mb-[7px] pointer-events-none">${weekday}</span><span class="text-[17px] font-medium leading-none pointer-events-none">${dayNum}</span>`;
+        }
+
+        card.addEventListener('click', () => {
+          if (track.dataset.isDragging === 'true') return;
+          card.style.transform = 'scale(0.92)';
+          setTimeout(() => {
+            selectedDate = new Date(date);
+            renderDateSlider(true);
+            updateDateDisplay();
+            updateMetrics();
+          }, 120);
+        });
+
+        if (isSelected) card.id = 'active-selected-day-card';
+        track.appendChild(card);
+      });
+
+      if (centerTarget) {
+        setTimeout(() => {
+          const activeCard = document.getElementById('active-selected-day-card');
+          const container = document.getElementById('date-slider-container');
+          if (activeCard && container) {
+            const leftPos = activeCard.offsetLeft - (container.clientWidth / 2) + (activeCard.clientWidth / 2);
+            container.scrollTo({ left: leftPos, behavior: 'smooth' });
+          }
+        }, 50);
+      }
+    }
+
+    const sliderContainer = document.getElementById('date-slider-container');
+    const sliderTrack = document.getElementById('date-slider-track');
+    let isDown = false, startX = 0, scrollLeft = 0;
+
+    sliderContainer.addEventListener('mousedown', (e) => {
+      isDown = true;
+      sliderTrack.dataset.isDragging = 'false';
+      startX = e.pageX - sliderContainer.offsetLeft;
+      scrollLeft = sliderContainer.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDown = false;
+      setTimeout(() => { sliderTrack.dataset.isDragging = 'false'; }, 50);
+    });
+
+    sliderContainer.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - sliderContainer.offsetLeft;
+      const walk = (x - startX) * 1.4;
+      if (Math.abs(walk) > 5) sliderTrack.dataset.isDragging = 'true';
+      sliderContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    const calendarPopup = document.getElementById('calendar-popup');
+    const calendarBackdrop = document.getElementById('calendar-backdrop');
+    const openCalendarBtn = document.getElementById('open-calendar-btn');
+    const calPrevMonth = document.getElementById('cal-prev-month');
+    const calNextMonth = document.getElementById('cal-next-month');
+    const calHeaderTitle = document.getElementById('cal-header-title');
+    const calDaysContainer = document.getElementById('calendar-days-container');
+
+    function toggleCalendarPopup() { if (isCalendarOpen) closeCalendar(); else openCalendar(); }
+    function openCalendar() {
+      isCalendarOpen = true;
+      viewMonthDate = new Date(selectedDate);
+      renderCalendarPopupDays();
+
+      const btnRect = openCalendarBtn.getBoundingClientRect();
+      const viewportRect = document.getElementById('app-viewport').getBoundingClientRect();
+      // Возвращаем календарь наверх под кнопку с подъемом на 4 пикселя (было +20, стало +16)
+      const relativeTop = btnRect.bottom - viewportRect.top + 16;
+      calendarPopup.style.top = `${relativeTop}px`;
+
+      openCalendarBtn.classList.remove('bg-cardBg', 'text-textWhite');
+      openCalendarBtn.classList.add('bg-btnInvert', 'text-[#050F1B]');
+      calendarBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+      calendarBackdrop.classList.add('opacity-100', 'pointer-events-auto');
+      calendarPopup.classList.remove('closed');
+      calendarPopup.classList.add('open');
+    }
+    function closeCalendar() {
+      isCalendarOpen = false;
+      openCalendarBtn.classList.remove('bg-btnInvert', 'text-[#050F1B]');
+      openCalendarBtn.classList.add('bg-cardBg', 'text-textWhite');
+      calendarBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      calendarBackdrop.classList.add('opacity-0', 'pointer-events-none');
+      calendarPopup.classList.remove('open');
+      calendarPopup.classList.add('closed');
+    }
+
+    openCalendarBtn.addEventListener('click', toggleCalendarPopup);
+    calendarBackdrop.addEventListener('click', closeCalendar);
+    calPrevMonth.addEventListener('click', (e) => { e.stopPropagation(); viewMonthDate.setMonth(viewMonthDate.getMonth() - 1); renderCalendarPopupDays(); });
+    calNextMonth.addEventListener('click', (e) => { e.stopPropagation(); viewMonthDate.setMonth(viewMonthDate.getMonth() + 1); renderCalendarPopupDays(); });
+
+    function renderCalendarPopupDays() {
+      const year = viewMonthDate.getFullYear();
+      const month = viewMonthDate.getMonth();
+      calHeaderTitle.textContent = `${MONTHS_FULL[month]} ${year}`;
+      calDaysContainer.innerHTML = '';
+
+      const firstDay = new Date(year, month, 1);
+      let startingDay = firstDay.getDay() - 1;
+      if (startingDay === -1) startingDay = 6;
+
+      const daysInCurrentMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+      for (let i = startingDay - 1; i >= 0; i--) {
+        const d = daysInPrevMonth - i;
+        const prevDate = new Date(year, month - 1, d);
+        calDaysContainer.appendChild(createCalendarCell(prevDate, d, true));
+      }
+      for (let d = 1; d <= daysInCurrentMonth; d++) {
+        const curDate = new Date(year, month, d);
+        calDaysContainer.appendChild(createCalendarCell(curDate, d, false));
+      }
+      const totalRendered = startingDay + daysInCurrentMonth;
+      const nextDaysCount = (7 - (totalRendered % 7)) % 7;
+      for (let d = 1; d <= nextDaysCount; d++) {
+        const nextDate = new Date(year, month + 1, d);
+        calDaysContainer.appendChild(createCalendarCell(nextDate, d, true));
+      }
+    }
+
+    function createCalendarCell(dateObj, displayNum, isAdjacentMonth) {
+      const btn = document.createElement('button');
+      btn.className = 'w-full aspect-square rounded-[10px] flex items-center justify-center font-rubik text-[12px] transition-all relative ';
+      const isRealToday = dateObj.toDateString() === REAL_TODAY.toDateString();
+      const isSelected = dateObj.toDateString() === selectedDate.toDateString();
+      const formattedNum = String(displayNum).padStart(2, '0');
+
+      if (isSelected) btn.className += 'bg-accentOrange text-textWhite font-semibold shadow-sm';
+      else if (isRealToday) btn.className += 'border-2 border-accentOrange text-textWhite font-medium';
+      else if (isAdjacentMonth) btn.className += 'text-textWhite/40 font-medium hover:bg-white/5';
+      else btn.className += 'text-textWhite font-medium hover:bg-white/10';
+
+      btn.textContent = formattedNum;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedDate = new Date(dateObj);
+        renderCalendarPopupDays();
+        renderDateSlider(true);
+        updateDateDisplay();
+        updateMetrics();
+        setTimeout(closeCalendar, 350);
+      });
+      return btn;
+    }
+
+    const navBtnHome = document.getElementById('nav-btn-home');
+    const navBtnRecipes = document.getElementById('nav-btn-recipes');
+    const navBtnProfile = document.getElementById('nav-btn-profile');
+    const navBtnAdd = document.getElementById('nav-btn-add');
+
+    const viewHome = document.getElementById('view-home');
+    const viewRecipes = document.getElementById('view-recipes');
+    const viewProfile = document.getElementById('view-profile');
+    const viewSettings = document.getElementById('view-settings');
+    const viewWidgets = document.getElementById('view-widgets');
+    const viewStyling = document.getElementById('view-styling');
+    const viewAccountDetails = document.getElementById('view-account-details');
+
+    const allViews = [viewHome, viewRecipes, viewProfile, viewSettings, viewWidgets, viewStyling, viewAccountDetails];
+
+    function switchTab(targetTab) {
+      closeCalendar();
+      [navBtnHome, navBtnRecipes, navBtnProfile].forEach(btn => btn.classList.remove('active'));
+      allViews.forEach(el => el.classList.remove('page-active'));
+
+      if (targetTab === 'home') { navBtnHome.classList.add('active'); viewHome.classList.add('page-active'); }
+      else if (targetTab === 'recipes') { 
+        navBtnRecipes.classList.add('active'); 
+        viewRecipes.classList.add('page-active'); 
+        renderRecipesScreenList();
+      }
+      else if (targetTab === 'profile') { navBtnProfile.classList.add('active'); viewProfile.classList.add('page-active'); }
+      else if (targetTab === 'settings') { navBtnProfile.classList.add('active'); viewSettings.classList.add('page-active'); }
+      else if (targetTab === 'widgets') { navBtnProfile.classList.add('active'); viewWidgets.classList.add('page-active'); }
+      else if (targetTab === 'styling') { navBtnProfile.classList.add('active'); viewStyling.classList.add('page-active'); }
+      else if (targetTab === 'account') { navBtnProfile.classList.add('active'); viewAccountDetails.classList.add('page-active'); }
+    }
+
+    navBtnHome.addEventListener('click', () => switchTab('home'));
+    navBtnRecipes.addEventListener('click', () => switchTab('recipes'));
+    navBtnProfile.addEventListener('click', () => switchTab('profile'));
+
+    document.getElementById('profile-settings-btn').addEventListener('click', () => switchTab('settings'));
+    document.getElementById('settings-back-btn').addEventListener('click', () => switchTab('profile'));
+    document.getElementById('add-widgets-btn').addEventListener('click', () => switchTab('widgets'));
+    document.getElementById('settings-goto-widgets-btn').addEventListener('click', () => switchTab('widgets'));
+    document.getElementById('widgets-back-btn').addEventListener('click', () => switchTab('settings'));
+    document.getElementById('settings-goto-styling-btn').addEventListener('click', () => switchTab('styling'));
+    document.getElementById('styling-back-btn').addEventListener('click', () => switchTab('settings'));
+    document.getElementById('settings-account-card-btn').addEventListener('click', () => switchTab('account'));
+    document.getElementById('account-back-btn').addEventListener('click', () => switchTab('settings'));
+
+    let currentEditingProductKey = null;
+    const editSavedProductModal = document.getElementById('edit-saved-product-modal');
+    const closeEditSavedModalBtn = document.getElementById('close-edit-saved-modal-btn');
+    const editSavedNameInput = document.getElementById('edit-saved-name-input');
+    const editSavedKInput = document.getElementById('edit-saved-k-input');
+    const editSavedBInput = document.getElementById('edit-saved-b-input');
+    const editSavedZhInput = document.getElementById('edit-saved-zh-input');
+    const editSavedUInput = document.getElementById('edit-saved-u-input');
+    const saveEditedSavedProductBtn = document.getElementById('save-edited-saved-product-btn');
+    const deleteSavedProductBtn = document.getElementById('delete-saved-product-btn');
+
+    closeEditSavedModalBtn.addEventListener('click', () => {
+      editSavedProductModal.classList.remove('modal-active');
+    });
+
+    saveEditedSavedProductBtn.addEventListener('click', () => {
+      if (!currentEditingProductKey) return;
+      const newName = editSavedNameInput.value.trim() || 'Продукт';
+      const k100 = editSavedKInput.value.trim() || '0';
+      const b100 = editSavedBInput.value.trim() || '0';
+      const zh100 = editSavedZhInput.value.trim() || '0';
+      const u100 = editSavedUInput.value.trim() || '0';
+
+      if (currentEditingProductKey !== newName) {
+        delete globalSavedProductsDatabase[currentEditingProductKey];
+      }
+
+      globalSavedProductsDatabase[newName] = { name: newName, k100, b100, zh100, u100 };
+
+      editSavedProductModal.classList.remove('modal-active');
+      renderRecipesScreenList();
+    });
+
+    deleteSavedProductBtn.addEventListener('click', () => {
+      if (!currentEditingProductKey) return;
+      delete globalSavedProductsDatabase[currentEditingProductKey];
+      editSavedProductModal.classList.remove('modal-active');
+      renderRecipesScreenList();
+    });
+
+    function renderRecipesScreenList() {
+      const container = document.getElementById('recipes-screen-list');
+      container.innerHTML = '';
+      const keys = Object.keys(globalSavedProductsDatabase);
+
+      if (keys.length === 0) {
+        container.innerHTML = `
+          <div class="w-full h-44 rounded-2xl bg-cardBg flex flex-col items-center justify-center text-textWhite/40 border border-white/5">
+            <i class="bi bi-file-earmark-text text-3xl mb-2"></i>
+            <span class="font-onest text-sm">Дневник сохранений пуст</span>
+          </div>
+        `;
+        return;
+      }
+
+      keys.forEach(nameKey => {
+        const prod = globalSavedProductsDatabase[nameKey];
+        const itemCard = document.createElement('div');
+        itemCard.className = 'w-full bg-[#1E2632] rounded-[16px] flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform shrink-0';
+        itemCard.style.height = '80px';
+        itemCard.style.padding = '16px';
+
+        itemCard.innerHTML = `
+          <div class="flex flex-col justify-center h-full flex-1">
+            <span class="font-onest font-medium text-[16px] text-[#F0F0F0] leading-snug">${prod.name}</span>
+            <div class="flex items-center" style="margin-top: 9px;">
+              <div class="h-[24px] px-[8px] rounded-[6px] bg-[#FF6434]/10 flex items-center justify-center shrink-0">
+                <span class="font-onest font-medium text-[12px] text-[#FF8762] leading-none">на 100 гр</span>
+              </div>
+              <div class="flex items-center" style="margin-left: 16px; gap: 24px;">
+                <div class="flex items-baseline gap-1">
+                  <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.k100 || 0}</span>
+                  <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">к</span>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.b100 || 0}</span>
+                  <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">б</span>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.zh100 || 0}</span>
+                  <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">ж</span>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.u100 || 0}</span>
+                  <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">у</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center pl-4 shrink-0">
+            <svg class="w-5 h-5 text-[#94FD17]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        `;
+
+        itemCard.addEventListener('click', () => {
+          currentEditingProductKey = prod.name;
+          editSavedNameInput.value = prod.name;
+          editSavedKInput.value = prod.k100;
+          editSavedBInput.value = prod.b100;
+          editSavedZhInput.value = prod.zh100;
+          editSavedUInput.value = prod.u100;
+          editSavedProductModal.classList.add('modal-active');
+        });
+
+        container.appendChild(itemCard);
+      });
+    }
+
+    const mealsCurtain = document.getElementById('meals-builder-curtain');
+    const closeCurtainBtn = document.getElementById('close-curtain-btn');
+    const templatesStack = document.getElementById('templates-stack');
+    const addTemplateRowBtn = document.getElementById('add-template-row-btn');
+    const plusIconHolder = document.getElementById('plus-icon-holder');
+    const templatesLimitMsg = document.getElementById('templates-limit-msg');
+    const curtainSaveAllBtn = document.getElementById('curtain-save-all-btn');
+    const templatesDocBtn = document.getElementById('templates-doc-btn');
+    const savedProductsSheet = document.getElementById('saved-products-sheet');
+    const closeSavedSheetBtn = document.getElementById('close-saved-sheet-btn');
+    const savedProductsList = document.getElementById('saved-products-list');
+    const savedSheetContent = document.getElementById('saved-sheet-content');
+    const sheetDragHandle = document.getElementById('sheet-drag-handle');
+
+    navBtnAdd.addEventListener('click', () => {
+      const activeNormForDay = getUserNormForDate(selectedDate);
+      if (!activeNormForDay.isSet) {
+        switchTab('home');
+        const normBtn = document.getElementById('edit-norm-btn');
+        normBtn.classList.remove('shake-norm');
+        void normBtn.offsetWidth;
+        normBtn.classList.add('shake-norm');
+        setTimeout(() => normBtn.classList.remove('shake-norm'), 1000);
+        return;
+      }
+
+      templatesStack.innerHTML = '';
+      createTemplateRow();
+      calculateCurtainTotals();
+      mealsCurtain.classList.remove('hidden-curtain');
+      mealsCurtain.classList.add('open-curtain');
+    });
+
+    closeCurtainBtn.addEventListener('click', () => {
+      mealsCurtain.classList.remove('open-curtain');
+      mealsCurtain.classList.add('hidden-curtain');
+    });
+
+    templatesDocBtn.addEventListener('click', () => {
+      renderSavedProductsSheetList();
+      savedProductsSheet.classList.remove('sheet-hidden');
+      savedProductsSheet.classList.add('sheet-open');
+    });
+
+    function closeSavedSheet() {
+      savedProductsSheet.classList.remove('sheet-open');
+      savedProductsSheet.classList.add('sheet-hidden');
+    }
+
+    closeSavedSheetBtn.addEventListener('click', closeSavedSheet);
+
+    savedProductsSheet.addEventListener('click', (e) => {
+      if (e.target === savedProductsSheet) closeSavedSheet();
+    });
+
+    let sheetStartY = 0;
+    let sheetCurrentY = 0;
+    let isSheetDragging = false;
+
+    sheetDragHandle.addEventListener('touchstart', (e) => {
+      isSheetDragging = true;
+      sheetStartY = e.touches[0].clientY;
+      savedSheetContent.style.transition = 'none';
+    }, {passive: true});
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isSheetDragging) return;
+      sheetCurrentY = e.touches[0].clientY - sheetStartY;
+      if (sheetCurrentY > 0) savedSheetContent.style.transform = `translateY(${sheetCurrentY}px)`;
+    }, {passive: true});
+
+    window.addEventListener('touchend', () => {
+      if (!isSheetDragging) return;
+      isSheetDragging = false;
+      savedSheetContent.style.transition = '';
+      if (sheetCurrentY > 120) closeSavedSheet();
+      savedSheetContent.style.transform = '';
+      sheetCurrentY = 0;
+    });
+
+    sheetDragHandle.addEventListener('mousedown', (e) => {
+      isSheetDragging = true;
+      sheetStartY = e.clientY;
+      savedSheetContent.style.transition = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isSheetDragging) return;
+      sheetCurrentY = e.clientY - sheetStartY;
+      if (sheetCurrentY > 0) savedSheetContent.style.transform = `translateY(${sheetCurrentY}px)`;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isSheetDragging) return;
+      isSheetDragging = false;
+      savedSheetContent.style.transition = '';
+      if (sheetCurrentY > 120) closeSavedSheet();
+      savedSheetContent.style.transform = '';
+      sheetCurrentY = 0;
+    });
+
+    function renderSavedProductsSheetList() {
+      savedProductsList.innerHTML = '';
+      const keys = Object.keys(globalSavedProductsDatabase);
+
+      if (keys.length === 0) {
+        savedProductsList.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-10 px-4 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-cardInput border border-white/5 flex items-center justify-center text-accentOrange mb-4 select-none shadow-inner">
+              <span class="font-rubik font-bold text-[20px] leading-none">:(</span>
+            </div>
+            <span class="font-onest font-semibold text-[18px] text-textWhite mb-1.5">Тут пока пусто</span>
+            <p class="font-onest text-[13px] text-textWhite/50 leading-relaxed max-w-[280px] mb-6">
+              Добавляйте новые блюда вручную, и они автоматически сохранятся в вашем дневнике для быстрого выбора.
+            </p>
+            <button id="empty-sheet-ok-btn" class="w-full max-w-[200px] h-[44px] bg-cardInput rounded-full font-onest font-medium text-[14px] text-textWhite border border-white/10 active:scale-[0.98] transition-transform shadow-sm">
+              Хорошо
+            </button>
+          </div>
+        `;
+        document.getElementById('empty-sheet-ok-btn').addEventListener('click', closeSavedSheet);
+        return;
+      }
+
+      keys.forEach(nameKey => {
+        const prod = globalSavedProductsDatabase[nameKey];
+        const itemCard = document.createElement('div');
+        itemCard.className = 'w-full bg-[#293342] rounded-[16px] flex flex-col justify-center cursor-pointer active:scale-[0.98] transition-transform shrink-0';
+        itemCard.style.height = '80px';
+        itemCard.style.padding = '16px';
+
+        itemCard.innerHTML = `
+          <span class="font-onest font-medium text-[16px] text-[#F0F0F0] leading-snug">${prod.name}</span>
+          <div class="flex items-center" style="margin-top: 9px;">
+            <div class="h-[24px] px-[8px] rounded-[6px] bg-[#FF6434]/10 flex items-center justify-center shrink-0">
+              <span class="font-onest font-medium text-[12px] text-[#FF8762] leading-none">на 100 гр</span>
+            </div>
+            <div class="flex items-center" style="margin-left: 16px; gap: 24px;">
+              <div class="flex items-baseline gap-1">
+                <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.k100 || 0}</span>
+                <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">к</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.b100 || 0}</span>
+                <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">б</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.zh100 || 0}</span>
+                <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">ж</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="font-rubik font-medium text-[14px] text-[#F0F0F0]/70">${prod.u100 || 0}</span>
+                <span class="font-onest font-normal text-[12px] text-[#F0F0F0]/50">у</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        itemCard.addEventListener('click', () => {
+          createTemplateRow({
+            name: prod.name,
+            weight: '',
+            k100: prod.k100,
+            b100: prod.b100,
+            zh100: prod.zh100,
+            u100: prod.u100
+          });
+          calculateCurtainTotals();
+          closeSavedSheet();
+        });
+
+        savedProductsList.appendChild(itemCard);
+      });
+    }
+
+    function createTemplateRow(prefillData = null) {
+      const currentCount = templatesStack.querySelectorAll('.template-item-row').length;
+
+      if (currentCount >= 12) {
+        triggerLimitAnimation();
+        return;
+      }
+
+      if (currentCount > 0) {
+        const line = document.createElement('div');
+        line.className = 'template-divider w-full h-[1px] bg-white opacity-[0.05] my-6 shrink-0';
+        templatesStack.appendChild(line);
+      }
+
+      const row = document.createElement('div');
+      row.className = 'template-item-row flex flex-col w-full animate-fadeIn';
+      
+      const defName = prefillData ? prefillData.name : '';
+      const defWeight = prefillData ? prefillData.weight : '';
+      const defK100 = prefillData ? prefillData.k100 : '';
+      const defB100 = prefillData ? prefillData.b100 : '';
+      const defZh100 = prefillData ? prefillData.zh100 : '';
+      const defU100 = prefillData ? prefillData.u100 : '';
+
+      row.innerHTML = `
+        <div class="flex items-end gap-[6px] w-full">
+          <div class="flex flex-col">
+            <span class="font-onest font-normal text-[12px] text-textWhite/20 mb-1">Название</span>
+            <input type="text" maxlength="30" value="${defName}" placeholder="Тёмный пивасик" class="item-name-input w-[270px] h-[50px] bg-[#1E2632] rounded-[14px] px-5 font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
+          </div>
+          <div class="flex flex-col flex-1">
+            <span class="font-onest font-normal text-[12px] text-textWhite/20 mb-1">Вес</span>
+            <input type="text" inputmode="decimal" value="${defWeight}" placeholder="гр/мл" class="item-weight-input w-full h-[50px] bg-[#1E2631] rounded-[14px] px-3 text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/30 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="mt-[24px] flex flex-col w-full">
+          <span class="font-onest font-normal text-[12px] text-textWhite/20 mb-2">КБЖУ на 100 гр/мл</span>
+          <div class="grid grid-cols-4 gap-[6px] w-full">
+            <input type="text" inputmode="decimal" value="${defK100}" placeholder="0" class="kbju-k-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
+            <input type="text" inputmode="decimal" value="${defB100}" placeholder="0" class="kbju-b-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
+            <input type="text" inputmode="decimal" value="${defZh100}" placeholder="0" class="kbju-zh-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
+            <input type="text" inputmode="decimal" value="${defU100}" placeholder="0" class="kbju-u-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
+          </div>
+
+          <div class="grid grid-cols-4 gap-[6px] w-full mt-[10px]">
+            <div class="flex items-center justify-center gap-1">
+              <span class="calc-k-val font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+              <span class="font-rubik font-medium text-[12px] text-textWhite/30">к</span>
+            </div>
+            <div class="flex items-center justify-center gap-1">
+              <span class="calc-b-val font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+              <span class="font-rubik font-medium text-[12px] text-textWhite/30">б</span>
+            </div>
+            <div class="flex items-center justify-center gap-1">
+              <span class="calc-zh-val font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+              <span class="font-rubik font-medium text-[12px] text-textWhite/30">ж</span>
+            </div>
+            <div class="flex items-center justify-center gap-1">
+              <span class="calc-u-val font-rubik font-medium text-[12px] text-textWhite/70">0</span>
+              <span class="font-rubik font-medium text-[12px] text-textWhite/30">у</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const weightInp = row.querySelector('.item-weight-input');
+      const kInp = row.querySelector('.kbju-k-input');
+      const bInp = row.querySelector('.kbju-b-input');
+      const zhInp = row.querySelector('.kbju-zh-input');
+      const uInp = row.querySelector('.kbju-u-input');
+
+      function sanitizeKbjuInput(inp) {
+        inp.addEventListener('input', () => {
+          let val = inp.value.replace(',', '.').replace(/[^0-9.]/g, '');
+          const parts = val.split('.');
+          if (parts[0].length > 3) parts[0] = parts[0].slice(0, 3);
+          inp.value = parts.join('.');
+          recalcRowValues(row);
+          calculateCurtainTotals();
+        });
+      }
+
+      weightInp.addEventListener('input', () => {
+        let val = weightInp.value.replace(',', '.').replace(/[^0-9.]/g, '');
+        const parts = val.split('.');
+        if (parts[0].length > 5) parts[0] = parts[0].slice(0, 5);
+        weightInp.value = parts.join('.');
+        recalcRowValues(row);
+        calculateCurtainTotals();
+      });
+
+      sanitizeKbjuInput(kInp);
+      sanitizeKbjuInput(bInp);
+      sanitizeKbjuInput(zhInp);
+      sanitizeKbjuInput(uInp);
+
+      templatesStack.appendChild(row);
+      if (prefillData) recalcRowValues(row);
+
+      setTimeout(() => {
+        const scrollContainer = document.getElementById('curtain-scroll-container');
+        if (scrollContainer) {
+          scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+        }
+      }, 50);
+    }
+
+    let limitTimeout = null;
+    function triggerLimitAnimation() {
+      if (limitTimeout) clearTimeout(limitTimeout);
+
+      addTemplateRowBtn.classList.add('too-many');
+      plusIconHolder.classList.add('icon-sad');
+      plusIconHolder.innerHTML = `<span class="font-rubik font-bold text-[18px] leading-none select-none">:(</span>`;
+      
+      templatesLimitMsg.classList.add('active');
+      templatesStack.style.transform = 'translateY(-12px)';
+
+      limitTimeout = setTimeout(() => {
+        addTemplateRowBtn.classList.remove('too-many');
+        plusIconHolder.classList.remove('icon-sad');
+        plusIconHolder.innerHTML = `<svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+        templatesLimitMsg.classList.remove('active');
+        templatesStack.style.transform = 'translateY(0px)';
+      }, 2000);
+    }
+
+    addTemplateRowBtn.addEventListener('click', () => createTemplateRow());
+
+    function recalcRowValues(row) {
+      const w = parseFloat(row.querySelector('.item-weight-input').value.replace(',', '.')) || 0;
+      const k100 = parseFloat(row.querySelector('.kbju-k-input').value.replace(',', '.')) || 0;
+      const b100 = parseFloat(row.querySelector('.kbju-b-input').value.replace(',', '.')) || 0;
+      const zh100 = parseFloat(row.querySelector('.kbju-zh-input').value.replace(',', '.')) || 0;
+      const u100 = parseFloat(row.querySelector('.kbju-u-input').value.replace(',', '.')) || 0;
+
+      const calcK = Math.round((k100 * w) / 100);
+      const calcB = Math.round(((b100 * w) / 100) * 10) / 10;
+      const calcZh = Math.round(((zh100 * w) / 100) * 10) / 10;
+      const calcU = Math.round(((u100 * w) / 100) * 10) / 10;
+
+      row.querySelector('.calc-k-val').textContent = calcK;
+      row.querySelector('.calc-b-val').textContent = String(calcB).replace('.', ',');
+      row.querySelector('.calc-zh-val').textContent = String(calcZh).replace('.', ',');
+      row.querySelector('.calc-u-val').textContent = String(calcU).replace('.', ',');
+    }
+
+    function calculateCurtainTotals() {
+      let sumK = 0, sumB = 0, sumZh = 0, sumU = 0;
+      document.querySelectorAll('.template-item-row').forEach(row => {
+        sumK += parseFloat(row.querySelector('.calc-k-val').textContent.replace(',', '.')) || 0;
+        sumB += parseFloat(row.querySelector('.calc-b-val').textContent.replace(',', '.')) || 0;
+        sumZh += parseFloat(row.querySelector('.calc-zh-val').textContent.replace(',', '.')) || 0;
+        sumU += parseFloat(row.querySelector('.calc-u-val').textContent.replace(',', '.')) || 0;
+      });
+
+      document.getElementById('curtain-total-k').textContent = Math.round(sumK);
+      document.getElementById('curtain-total-b').textContent = String(Math.round(sumB * 10) / 10).replace('.', ',');
+      document.getElementById('curtain-total-zh').textContent = String(Math.round(sumZh * 10) / 10).replace('.', ',');
+      document.getElementById('curtain-total-u').textContent = String(Math.round(sumU * 10) / 10).replace('.', ',');
+    }
+
+    curtainSaveAllBtn.addEventListener('click', () => {
+      const items = [];
+      let totalK = 0, totalB = 0, totalZh = 0, totalU = 0;
+      let hasValidationErrors = false;
+      let firstErrorWeightInput = null;
+
+      document.querySelectorAll('.template-item-row').forEach(row => {
+        const nameVal = row.querySelector('.item-name-input').value.trim();
+        const weightValStr = row.querySelector('.item-weight-input').value.trim();
+        const weightVal = parseFloat(weightValStr.replace(',', '.')) || 0;
+        
+        const k100Val = row.querySelector('.kbju-k-input').value.trim();
+        const b100Val = row.querySelector('.kbju-b-input').value.trim();
+        const zh100Val = row.querySelector('.kbju-zh-input').value.trim();
+        const u100Val = row.querySelector('.kbju-u-input').value.trim();
+
+        const hasAnyNutrient = k100Val !== '' || b100Val !== '' || zh100Val !== '' || u100Val !== '';
+        const isCompletelyEmpty = nameVal === '' && weightValStr === '' && !hasAnyNutrient;
+
+        if (isCompletelyEmpty) return;
+
+        if (weightVal > 5000 || (weightVal <= 0 && hasAnyNutrient)) {
+          hasValidationErrors = true;
+          const weightInput = row.querySelector('.item-weight-input');
+          if (!firstErrorWeightInput) firstErrorWeightInput = weightInput;
+
+          weightInput.classList.remove('shake-weight-input');
+          void weightInput.offsetWidth;
+          weightInput.classList.add('shake-weight-input');
+          setTimeout(() => weightInput.classList.remove('shake-weight-input'), 600);
+          return;
+        }
+
+        if (weightVal <= 0) return;
+
+        const k = row.querySelector('.calc-k-val').textContent;
+        const b = row.querySelector('.calc-b-val').textContent;
+        const zh = row.querySelector('.calc-zh-val').textContent;
+        const u = row.querySelector('.calc-u-val').textContent;
+
+        totalK += parseFloat(k.replace(',', '.')) || 0;
+        totalB += parseFloat(b.replace(',', '.')) || 0;
+        totalZh += parseFloat(zh.replace(',', '.')) || 0;
+        totalU += parseFloat(u.replace(',', '.')) || 0;
+
+        const finalName = nameVal || 'Продукт';
+        const itemObj = { 
+          name: finalName, 
+          weight: weightVal, 
+          k, b, zh, u, 
+          k100: k100Val || '0', 
+          b100: b100Val || '0', 
+          zh100: zh100Val || '0', 
+          u100: u100Val || '0', 
+          calcK: k 
+        };
+        items.push(itemObj);
+
+        globalSavedProductsDatabase[finalName] = {
+          name: finalName,
+          k100: k100Val || '0',
+          b100: b100Val || '0',
+          zh100: zh100Val || '0',
+          u100: u100Val || '0'
+        };
+      });
+
+      if (hasValidationErrors) {
+        if (firstErrorWeightInput) firstErrorWeightInput.focus();
+        return;
+      }
+
+      if (items.length === 0) {
+        mealsCurtain.classList.remove('open-curtain');
+        mealsCurtain.classList.add('hidden-curtain');
+        return;
+      }
+
+      const dayData = getDayMetrics(selectedDate);
+      dayData.calories += Math.round(totalK);
+      dayData.protein += Math.round(totalB);
+      dayData.fat += Math.round(totalZh);
+      dayData.carbs += Math.round(totalU);
+
+      dayData.meals.push({
+        totalK: Math.round(totalK),
+        totalB: String(Math.round(totalB * 10) / 10).replace('.', ','),
+        totalZh: String(Math.round(totalZh * 10) / 10).replace('.', ','),
+        totalU: String(Math.round(totalU * 10) / 10).replace('.', ','),
+        items: items
+      });
+
+      mealsCurtain.classList.remove('open-curtain');
+      mealsCurtain.classList.add('hidden-curtain');
+      switchTab('home');
+      updateMetrics();
+    });
+
+    const stylingThemeSwitch = document.getElementById('styling-theme-switch');
+    stylingThemeSwitch.addEventListener('click', () => {
+      stylingThemeSwitch.classList.toggle('active');
+      const isDark = stylingThemeSwitch.classList.contains('active');
+      document.getElementById('app-viewport').style.backgroundColor = isDark ? '#050F1B' : '#F4F5F8';
+    });
+
+    const palettes = {
+      neon: { green: '#94FD17', orange: '#FF6434' },
+      emerald: { green: '#00F5A0', orange: '#00D9F5' },
+      sunset: { green: '#FFB199', orange: '#FF0844' },
+      cyber: { green: '#E94057', orange: '#8A2387' }
+    };
+    let selectedPalette = 'neon';
+
+    document.querySelectorAll('.theme-palette-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-palette-btn').forEach(b => {
+          b.classList.remove('ring-2', 'ring-white');
+          b.classList.add('ring-0');
+        });
+        btn.classList.remove('ring-0');
+        btn.classList.add('ring-2', 'ring-white');
+        selectedPalette = btn.dataset.theme;
+        const pal = palettes[selectedPalette];
+        document.getElementById('preview-arc').setAttribute('stroke', pal.green);
+        document.getElementById('preview-bar-p').style.backgroundColor = pal.green;
+        document.getElementById('preview-bar-f').style.backgroundColor = pal.green;
+        document.getElementById('preview-bar-c').style.backgroundColor = pal.green;
+      });
+    });
+
+    document.getElementById('save-styling-btn').addEventListener('click', () => {
+      const pal = palettes[selectedPalette];
+      document.querySelectorAll('#protein-progress-bar, #fat-progress-bar, #carbs-progress-bar').forEach(el => {
+        el.style.backgroundColor = pal.green;
+      });
+      document.getElementById('gauge-progress').setAttribute('stroke', pal.green);
+      switchTab('home');
+    });
+
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    themeToggleBtn.addEventListener('click', () => {
+      themeToggleBtn.classList.toggle('active');
+      const willBeActive = themeToggleBtn.classList.contains('active');
+      document.getElementById('app-viewport').style.backgroundColor = willBeActive ? '#050F1B' : '#F4F5F8';
+    });
+
+    const langSwitchToggle = document.getElementById('lang-switch-toggle');
+    const langIndicator = document.getElementById('lang-indicator');
+    const langLabelRu = document.getElementById('lang-label-ru');
+    const langLabelEn = document.getElementById('lang-label-en');
+    let currentAppLang = 'RU';
+
+    langSwitchToggle.addEventListener('click', () => {
+      if (currentAppLang === 'RU') {
+        currentAppLang = 'EN';
+        langIndicator.style.transform = 'translateX(37.5px)';
+        langLabelRu.className = 'relative z-10 w-[37px] text-center font-rubik font-normal text-[13px] text-[#E5E5E5] leading-none transition-colors';
+        langLabelEn.className = 'relative z-10 w-[37px] text-center font-rubik font-semibold text-[13px] text-[#050F1B] leading-none transition-colors';
+      } else {
+        currentAppLang = 'RU';
+        langIndicator.style.transform = 'translateX(0px)';
+        langLabelRu.className = 'relative z-10 w-[37px] text-center font-rubik font-semibold text-[13px] text-[#050F1B] leading-none transition-colors';
+        langLabelEn.className = 'relative z-10 w-[37px] text-center font-rubik font-normal text-[13px] text-[#E5E5E5] leading-none transition-colors';
+      }
+    });
+
+    const normModal = document.getElementById('norm-modal');
+    const editNormBtn = document.getElementById('edit-norm-btn');
+    const closeNormModalBtn = document.getElementById('close-norm-modal-btn');
+    const saveNormBtn = document.getElementById('save-norm-btn');
+    const inputs = [
+      document.getElementById('input-k'),
+      document.getElementById('input-b'),
+      document.getElementById('input-zh'),
+      document.getElementById('input-u')
+    ];
+    const placeholders = [
+      document.getElementById('placeholder-k'),
+      document.getElementById('placeholder-b'),
+      document.getElementById('placeholder-zh'),
+      document.getElementById('placeholder-u')
+    ];
+    const normBoxes = [
+      document.getElementById('norm-box-k'),
+      document.getElementById('norm-box-b'),
+      document.getElementById('norm-box-zh'),
+      document.getElementById('norm-box-u')
+    ];
+
+    editNormBtn.addEventListener('click', () => {
+      const activeNorm = getUserNormForDate(selectedDate);
+      inputs[0].value = activeNorm.isSet ? activeNorm.calories : '';
+      inputs[1].value = activeNorm.isSet ? activeNorm.protein : '';
+      inputs[2].value = activeNorm.isSet ? activeNorm.fat : '';
+      inputs[3].value = activeNorm.isSet ? activeNorm.carbs : '';
+      inputs.forEach((inp, idx) => placeholders[idx].classList.toggle('hidden', inp.value.length > 0));
+      normModal.classList.add('modal-active');
+      inputs[0].focus();
+    });
+
+    closeNormModalBtn.addEventListener('click', () => normModal.classList.remove('modal-active'));
+
+    inputs.forEach((input, index) => {
+      const maxLen = (index === 0) ? 4 : 3;
+      input.addEventListener('input', () => {
+        let val = input.value.replace(/[^0-9]/g, '');
+        if (val.length > maxLen) val = val.slice(0, maxLen);
+        input.value = val;
+
+        placeholders[index].classList.toggle('hidden', input.value.length > 0);
+        if (index === 0 && input.value.length >= 4) inputs[1].focus();
+        else if (index > 0 && index < 3 && input.value.length >= 3) inputs[index + 1].focus();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value.length === 0 && index > 0) inputs[index - 1].focus();
+      });
+    });
+
+    saveNormBtn.addEventListener('click', () => {
+      let hasError = false;
+      let firstErrorBox = null;
+
+      inputs.forEach((inp, idx) => {
+        const box = normBoxes[idx];
+        if (!inp.value.trim()) {
+          hasError = true;
+          if (!firstErrorBox) firstErrorBox = inp;
+          box.classList.remove('shake-red-input');
+          void box.offsetWidth;
+          box.classList.add('shake-red-input');
+          setTimeout(() => box.classList.remove('shake-red-input'), 600);
+        }
+      });
+
+      if (hasError) {
+        if (firstErrorBox) firstErrorBox.focus();
+        return;
+      }
+
+      const valK = parseInt(inputs[0].value, 10) || 0;
+      const valB = parseInt(inputs[1].value, 10) || 0;
+      const valZh = parseInt(inputs[2].value, 10) || 0;
+      const valU = parseInt(inputs[3].value, 10);
+
+      const dateKey = getDateKey(selectedDate);
+      historicalNormsStore[dateKey] = {
+        calories: valK,
+        protein: valB,
+        fat: valZh,
+        carbs: valU || 0,
+        isSet: true
+      };
+
+      document.getElementById('norm-text-preview').textContent = `${valK}/${valB}/${valZh}/${valU}`;
+      normModal.classList.remove('modal-active');
+      updateMetrics();
+    });
+
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const profileModal = document.getElementById('profile-modal');
+    const closeProfileModalBtn = document.getElementById('close-profile-modal-btn');
+    const saveProfileBtn = document.getElementById('save-profile-btn');
+    const editProfileNameInput = document.getElementById('edit-profile-name-input');
+    const profileUserName = document.getElementById('profile-user-name');
+    const settingsUserName = document.getElementById('settings-user-name');
+    const accountPageName = document.getElementById('account-page-name');
+    const profileAvatarImg = document.getElementById('profile-avatar-img');
+    const settingsAvatarImg = document.getElementById('settings-avatar-img');
+    const accountPageAvatar = document.getElementById('account-page-avatar');
+    const profileFileInput = document.getElementById('profile-file-input');
+    const triggerUploadBtn = document.getElementById('trigger-upload-btn');
+    
+    const photoCropPreviewContainer = document.getElementById('photo-crop-preview-container');
+    const cropImagePreview = document.getElementById('crop-image-preview');
+    const photoScaleRange = document.getElementById('photo-scale-range');
+    let tempAvatarSrc = null;
+    let photoOffsetX = 0;
+    let photoOffsetY = 0;
+    let isPhotoDragging = false;
+    let photoStartX = 0;
+    let photoStartY = 0;
+
+    editProfileBtn.addEventListener('click', () => {
+      editProfileNameInput.value = profileUserName.textContent.trim();
+      tempAvatarSrc = null;
+      photoCropPreviewContainer.classList.add('hidden');
+      profileModal.classList.add('modal-active');
+    });
+
+    closeProfileModalBtn.addEventListener('click', () => profileModal.classList.remove('modal-active'));
+    triggerUploadBtn.addEventListener('click', () => profileFileInput.click());
+
+    profileFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          tempAvatarSrc = event.target.result;
+          cropImagePreview.src = tempAvatarSrc;
+          photoScaleRange.value = 1;
+          cropImagePreview.style.transform = 'scale(1)';
+          photoOffsetX = 0;
+          photoOffsetY = 0;
+          cropImagePreview.style.left = '0px';
+          cropImagePreview.style.top = '0px';
+          photoCropPreviewContainer.classList.remove('hidden');
+          triggerUploadBtn.innerHTML = `<i class="bi bi-check-circle-fill text-accentGreen"></i> <span>Фото загружено</span>`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    photoScaleRange.addEventListener('input', () => {
+      const scale = photoScaleRange.value;
+      cropImagePreview.style.transform = `scale(${scale})`;
+    });
+
+    cropImagePreview.addEventListener('mousedown', (e) => {
+      isPhotoDragging = true;
+      photoStartX = e.clientX - photoOffsetX;
+      photoStartY = e.clientY - photoOffsetY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPhotoDragging) return;
+      photoOffsetX = e.clientX - photoStartX;
+      photoOffsetY = e.clientY - photoStartY;
+      cropImagePreview.style.left = `${photoOffsetX}px`;
+      cropImagePreview.style.top = `${photoOffsetY}px`;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isPhotoDragging = false;
+    });
+
+    cropImagePreview.addEventListener('touchstart', (e) => {
+      isPhotoDragging = true;
+      photoStartX = e.touches[0].clientX - photoOffsetX;
+      photoStartY = e.touches[0].clientY - photoOffsetY;
+    }, {passive: true});
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isPhotoDragging) return;
+      photoOffsetX = e.touches[0].clientX - photoStartX;
+      photoOffsetY = e.touches[0].clientY - photoStartY;
+      cropImagePreview.style.left = `${photoOffsetX}px`;
+      cropImagePreview.style.top = `${photoOffsetY}px`;
+    }, {passive: true});
+
+    window.addEventListener('touchend', () => {
+      isPhotoDragging = false;
+    });
+
+    saveProfileBtn.addEventListener('click', () => {
+      const newName = editProfileNameInput.value.trim();
+      if (newName) {
+        profileUserName.textContent = newName;
+        settingsUserName.textContent = newName;
+        accountPageName.textContent = newName;
+      }
+      if (tempAvatarSrc) {
+        profileAvatarImg.src = tempAvatarSrc;
+        settingsAvatarImg.src = tempAvatarSrc;
+        accountPageAvatar.src = tempAvatarSrc;
+        const scaleVal = photoScaleRange.value;
+        [profileAvatarImg, settingsAvatarImg, accountPageAvatar].forEach(img => {
+          img.style.objectFit = 'cover';
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.transform = `scale(${scaleVal}) translate(${photoOffsetX}px, ${photoOffsetY}px)`;
+        });
+      }
+      profileModal.classList.remove('modal-active');
+      triggerUploadBtn.innerHTML = `<i class="bi bi-image"></i> <span>Выбрать из галереи</span>`;
+      photoCropPreviewContainer.classList.add('hidden');
+    });
+
+    const activeWidgets = { weight: false, steps: false, activity: false, strength: false, notes: false };
+    const widgetMeta = {
+      weight: { title: 'Вес', value: '72.4 кг', sub: 'Цель: 70.0 кг', icon: '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path><path d="M9 3h6"></path>' },
+      steps: { title: 'Шаги', value: '8 420', sub: 'Цель: 10 000', icon: '<circle cx="12" cy="5" r="2"></circle><path d="M10 22l2-7 3 3v4"></path><path d="M14 13l2-3-4-2-3 4 2 3"></path>' },
+      activity: { title: 'Активность', value: '42 мин', sub: 'Кардио и разминка', icon: '<circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5l3.5-7 3 2.5"></path><path d="M5.5 17.5l4-7 4.5 1"></path>' },
+      strength: { title: 'Прогресс силовых', value: '95 кг', sub: 'Жим лежа +2.5 кг', icon: '<path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"></path>' },
+      notes: { title: 'Заметки', value: 'Водный баланс', sub: 'Выпито 1.8 л из 2.2 л', icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>' }
+    };
+
+    document.querySelectorAll('.widget-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab('widgets');
+        const key = btn.dataset.widgetKey;
+        btn.classList.toggle('active');
+        activeWidgets[key] = btn.classList.contains('active');
+        renderProfileWidgets();
+      });
+    });
+
+    document.getElementById('add-widgets-btn').addEventListener('click', () => {
+      switchTab('widgets');
+    });
+
+    function renderProfileWidgets() {
+      const banner = document.getElementById('profile-default-widget-banner');
+      const list = document.getElementById('profile-active-widgets-list');
+      const hasActive = Object.values(activeWidgets).some(Boolean);
+
+      if (hasActive) {
+        banner.classList.add('hidden');
+        list.classList.remove('hidden');
+        list.innerHTML = '';
+        for (const [key, isActive] of Object.entries(activeWidgets)) {
+          if (!isActive) continue;
+          const meta = widgetMeta[key];
+          const item = document.createElement('div');
+          item.className = 'w-full bg-cardBg rounded-[20px] p-4 flex items-center justify-between border border-white/5 shadow-sm';
+          item.innerHTML = `
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-iconPlateBg flex items-center justify-center text-accentGreen shrink-0 shadow-inner">
+                <svg class="w-5 h-5 stroke-current stroke-[2] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${meta.icon}</svg>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-onest font-medium text-sm text-textWhite/90 leading-tight">${meta.title}</span>
+                <span class="font-onest text-xs text-textWhite/40 leading-snug mt-0.5">${meta.sub}</span>
+              </div>
+            </div>
+            <span class="font-rubik font-semibold text-base text-accentGreen">${meta.value}</span>
+          `;
+          list.appendChild(item);
+        }
+      } else {
+        banner.classList.remove('hidden');
+        list.classList.add('hidden');
+        list.innerHTML = '';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      selectedDate = new Date(REAL_TODAY);
+      renderDateSlider(true);
+      updateDateDisplay();
+      updateMetrics();
+    });
+  </script>
+</body>
+</html>
