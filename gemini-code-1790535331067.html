@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Calory">
+  <link rel="apple-touch-icon" href="/calory-logo.png">
   <meta name="theme-color" content="#050F1B">
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json"[cite: 1]>
   
-  <title>KBJU Tracker</title>
+  <title>Calory</title>
   
   <!-- Google Fonts: Onest & Rubik -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -228,6 +230,7 @@
       flex-shrink: 0;
     }
     .ios-switch.active { background-color: #FF6434; }
+    .ios-switch.active.switch-green { background-color: #94FD17; }
     .ios-switch .thumb {
       width: 26px;
       height: 26px;
@@ -245,12 +248,12 @@
     .slide-curtain.hidden-curtain {
       transform: translateY(100%);
       opacity: 0;
-      pointer-events: none;
+      pointer-events: none !important;
     }
     .slide-curtain.open-curtain {
       transform: translateY(0%);
       opacity: 1;
-      pointer-events: auto;
+      pointer-events: auto !important;
     }
 
     .ios-sheet {
@@ -259,12 +262,12 @@
     .ios-sheet.sheet-hidden {
       transform: translateY(100%);
       opacity: 0;
-      pointer-events: none;
+      pointer-events: none !important;
     }
     .ios-sheet.sheet-open {
       transform: translateY(0%);
       opacity: 1;
-      pointer-events: auto;
+      pointer-events: auto !important;
     }
 
     .modal-overlay {
@@ -308,13 +311,12 @@
     }
 
     @keyframes shakeRedField {
-      0%, 100% { transform: translateX(0); box-shadow: 0 0 0px #FD5B71; }
-      20%, 60% { transform: translateX(-5px); box-shadow: 0 0 10px #FD5B71; }
-      40%, 80% { transform: translateX(5px); box-shadow: 0 0 10px #FD5B71; }
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
     }
     .shake-red-input {
       animation: shakeRedField 0.5s ease-in-out;
-      background-color: rgba(253, 91, 113, 0.15) !important;
     }
 
     #add-template-row-btn {
@@ -346,6 +348,109 @@
     #templates-stack {
       transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+    .archive-container-anim {
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 1000px;
+      opacity: 1;
+      overflow: hidden;
+    }
+    .archive-container-anim.hidden-archive {
+      max-height: 0px;
+      opacity: 0;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    .archive-cell-item {
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, opacity 0.3s ease;
+      will-change: transform;
+    }
+
+    .track-no-scroll {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      overflow: hidden !important;
+      touch-action: none !important;
+    }
+    .track-no-scroll::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .tap-press {
+      transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      cursor: pointer;
+    }
+    .tap-press:active { transform: scale(0.94); }
+    .tap-press-subtle:active { transform: scale(0.985); }
+
+    @keyframes waterFillFromBottom {
+      0% { clip-path: inset(100% 0 0 0); }
+      100% { clip-path: inset(0 0 0 0); }
+    }
+    @keyframes waterDrainToBottom {
+      0% { clip-path: inset(0 0 0 0); }
+      100% { clip-path: inset(100% 0 0 0); }
+    }
+
+    .anim-water-fill {
+      animation: waterFillFromBottom 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+    }
+    .anim-water-drain {
+      animation: waterDrainToBottom 0.24s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    }
+
+    @keyframes smoothSlideInLeft {
+      0% { opacity: 0.3; transform: translateX(-16px) scale(0.96); }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    .can-enter-left {
+      animation: smoothSlideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .btn-pop-in {
+      animation: popIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .btn-pop-out {
+      animation: popOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes popOut {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+
+    .save-pulse {
+      animation: gentlePulse 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes gentlePulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(148, 253, 23, 0.8); }
+      40% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(148, 253, 23, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(148, 253, 23, 0); }
+    }
+
+    .slot-weight, .slot-steps {
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1) !important;
+      will-change: flex, max-width;
+    }
+    .wide-save-btn {
+      transition: all 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease !important;
+      will-change: max-width, width, padding, margin, transform, opacity;
+      overflow: hidden;
+    }
+    .widget-field-input {
+      background-color: transparent !important;
+      color: #F0F0F0 !important;
+      caret-color: #94FD17 !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
   </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-0 sm:p-4 text-textWhite font-onest antialiased bg-appBg">
@@ -359,7 +464,16 @@
         
         <div id="calendar-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[14px] z-30 opacity-0 pointer-events-none backdrop-anim"></div>
 
-        <div id="calendar-popup" class="calendar-popup closed absolute left-5 right-5 z-[120] bg-cardBg rounded-[20px] pt-[21px] pb-[21px] px-[27px] shadow-2xl flex flex-col select-none">
+        <button id="floating-calendar-btn" aria-label="Закрыть календарь" class="absolute w-12 h-12 rounded-full bg-btnInvert flex items-center justify-center shrink-0 text-[#050F1B] transition-all duration-300 active:scale-95 shadow-lg z-50 opacity-0 pointer-events-none">
+          <svg class="w-5 h-5 fill-none stroke-current stroke-2 pointer-events-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+
+        <div id="calendar-popup" class="calendar-popup closed absolute left-5 right-5 z-50 bg-cardBg rounded-[20px] pt-[21px] pb-[21px] px-[27px] shadow-2xl flex flex-col select-none">
           <div class="flex items-center justify-between w-full">
             <button id="cal-prev-month" aria-label="Предыдущий месяц" class="p-1 text-accentGreen hover:opacity-80 active:scale-90 transition-transform">
               <svg class="w-[20px] h-[20px] stroke-current stroke-[2.6] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -384,13 +498,12 @@
 
         <div id="home-scroll-area" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(16px + env(safe-area-inset-top, 0px));" class="w-full h-full overflow-y-auto scroll-container no-scrollbar flex flex-col scroll-smooth">
           
-          <section class="pl-5 pr-2 flex items-center justify-between gap-1.5 relative z-40 shrink-0">
-            <div id="date-slider-container" class="calendar-mask flex-1 overflow-x-auto no-scrollbar py-1 cursor-grab active:cursor-grabbing select-none pr-1">
-              <div id="date-slider-track" class="flex gap-2 items-center pr-2"></div>
+          <section class="pl-5 pr-5 flex items-center justify-between gap-3 relative z-20 shrink-0">
+            <div id="date-slider-container" class="calendar-mask flex-1 overflow-x-auto no-scrollbar py-1 cursor-grab active:cursor-grabbing select-none">
+              <div id="date-slider-track" class="flex gap-2.5 items-center pr-4"></div>
             </div>
 
-            <!-- Кнопка календаря на высочайшем слое z-[100], чтобы никогда не уходить под блюр -->
-            <button id="open-calendar-btn" aria-label="Открыть календарь" class="w-12 h-12 rounded-full bg-cardBg flex items-center justify-center shrink-0 text-textWhite transition-all duration-300 active:scale-95 shadow-lg relative z-[100] ml-[6px]">
+            <button id="open-calendar-btn" aria-label="Открыть календарь" class="w-12 h-12 rounded-full bg-cardBg flex items-center justify-center shrink-0 text-textWhite transition-all duration-300 active:scale-95 shadow-lg relative ml-[20px]">
               <svg id="calendar-icon-svg" class="w-5 h-5 fill-none stroke-current stroke-2 transition-colors duration-300 pointer-events-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -545,9 +658,9 @@
 
         <div class="relative w-[140px] h-[140px] mx-auto shrink-0">
           <div class="w-[140px] h-[140px] rounded-full bg-[#1E2632] overflow-hidden flex items-center justify-center shadow-lg">
-            <img id="profile-avatar-img" src="https://emojigraph.org/media/144/apple/hear-no-evil-monkey_1f649.png" alt="Аватар профиля" class="w-[70px] h-[70px] object-contain pointer-events-none" />
+            <img id="profile-avatar-img" src="https://emojigraph.org/media/144/apple/octopus_1f419.png" alt="Аватар профиля" class="w-[85px] h-[85px] object-contain pointer-events-none" />
           </div>
-          <button id="edit-profile-btn" aria-label="Редактировать профиль" class="absolute -top-1.5 -right-1.5 w-[44px] h-[44px] rounded-full bg-[#1E2631] border border-white/10 grid place-items-center text-[#E5E5E5] active:scale-90 transition-all shadow-md z-10">
+          <button id="edit-profile-btn" aria-label="Редактировать профиль" class="absolute -top-1.5 -right-1.5 w-[44px] h-[44px] rounded-full bg-[#1E2631] border border-white/10 grid place-items-center text-[#E5E5E5] active:scale-90 transition-all shadow-md z-10 cursor-pointer">
             <svg class="w-[17px] h-[17px] stroke-current stroke-[2] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
             </svg>
@@ -567,27 +680,27 @@
             <span>Статистика</span><br>
             <span>за&nbsp;всё&nbsp;время</span>
           </div>
-          <button id="open-stats-table-btn" class="px-6 py-3 rounded-full border-2 border-accentGreen text-accentGreen font-rubik font-normal text-[16px] leading-none active:scale-95 transition-transform shrink-0 whitespace-nowrap">Таблица</button>
+          <button id="open-stats-table-btn" style="width: 170px; height: 50px;" class="rounded-full border-2 border-accentGreen text-accentGreen font-rubik font-normal text-[16px] leading-none active:scale-95 transition-transform shrink-0 whitespace-nowrap flex items-center justify-center">Таблица</button>
         </div>
 
         <div class="h-[30px] shrink-0"></div>
 
-        <div class="font-onest font-medium text-[14px] text-[#F0F0F0]/40 text-center px-4 leading-[1.35] select-none shrink-0">
-          Данные сохраняются в таблицу<br>статистики&nbsp;для полного отчета
+        <div class="font-onest font-normal text-[12px] text-[#F0F0F0]/40 text-center px-4 leading-[1.35] select-none shrink-0" style="font-family: 'Onest', sans-serif;">
+          Заполняйте виджеты каждый день —<br>статистика сохраняется в таблице
         </div>
 
         <div class="h-[30px] shrink-0"></div>
 
         <div id="profile-default-widget-banner" class="w-full bg-[#1E2632] rounded-[24px] p-5 flex flex-col gap-4 shrink-0 shadow-sm border border-white/5">
-          <div class="flex items-start gap-3.5">
+          <div class="flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-iconPlateBg flex items-center justify-center shrink-0 text-accentGreen shadow-inner">
               <svg class="w-[21px] h-[21px] stroke-current stroke-[2] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
               </svg>
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col justify-center">
               <span class="font-onest font-semibold text-[18px] text-[#F0F0F0] leading-tight">Добавьте виджеты</span>
-              <p class="font-onest text-[13px] text-[#F0F0F0]/50 mt-1 leading-snug">Настройте трекинг веса, шагов и заметок&nbsp;для полной статистики в профиле.</p>
+              <p class="font-onest text-[13px] text-[#F0F0F0]/50 mt-1 leading-snug">Отслеживайте вес, шаги и воду</p>
             </div>
           </div>
           <button id="add-widgets-btn" class="w-full h-[48px] bg-cardInput rounded-full px-5 flex items-center justify-between border border-white/10 active:scale-[0.98] transition-transform group shadow-inner">
@@ -596,13 +709,14 @@
           </button>
         </div>
 
-        <div id="profile-active-widgets-list" class="flex flex-col gap-3 w-full shrink-0 hidden"></div>
+        <!-- Контейнер для активных виджетов: Вес, Шаги, Вода -->
+        <div id="profile-active-widgets-list" style="display: flex; flex-direction: column; gap: 16px; width: 100%;" class="shrink-0 hidden"></div>
       </div>
 
       <!-- ЭКРАН 5: НАСТРОЙКИ -->
       <div id="view-settings" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
-        <button id="settings-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
-          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <button id="settings-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-75 transition-opacity w-fit select-none py-2 pr-4 -ml-2 -mt-2">
+          <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
         </button>
 
@@ -611,7 +725,7 @@
         <div id="settings-account-card-btn" class="w-full h-[93px] bg-cardBg rounded-[16px] p-[20px] flex items-center justify-between shrink-0 shadow-sm cursor-pointer active:bg-white/5 transition-colors">
           <div class="flex items-center">
             <div class="w-[53px] h-[53px] rounded-full bg-[#1E2631] overflow-hidden flex items-center justify-center shrink-0 border border-white/5">
-              <img id="settings-avatar-img" src="https://emojigraph.org/media/144/apple/hear-no-evil-monkey_1f649.png" alt="Аватар" class="w-[30px] h-[30px] object-contain pointer-events-none" />
+              <img id="settings-avatar-img" src="https://emojigraph.org/media/144/apple/octopus_1f419.png" alt="Аватар" class="w-[32px] h-[32px] object-contain pointer-events-none" />
             </div>
             <div class="ml-[20px] flex flex-col leading-none">
               <span id="settings-user-name" class="font-onest font-semibold text-[18px] text-[#F0F0F0] leading-tight">Чебупелька</span>
@@ -671,7 +785,7 @@
 
         <div class="h-[32px] shrink-0"></div>
 
-        <div class="w-full bg-cardBg rounded-[16px] p-[18px] flex items-center justify-between shrink-0 shadow-sm">
+        <div id="settings-feedback-btn" class="w-full bg-cardBg rounded-[16px] p-[18px] flex items-center justify-between shrink-0 shadow-sm cursor-pointer active:bg-white/5 transition-colors">
           <div class="flex items-center">
             <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Обратная связь</span>
@@ -681,7 +795,7 @@
 
         <div class="h-[32px] shrink-0"></div>
 
-        <div class="w-full bg-cardBg rounded-[16px] p-[18px] flex items-center justify-between shrink-0 shadow-sm">
+        <div id="settings-goto-reset-btn" class="w-full bg-cardBg rounded-[16px] p-[18px] flex items-center justify-between shrink-0 shadow-sm cursor-pointer active:bg-white/5 transition-colors">
           <span class="font-onest font-medium text-[14px] text-[#F0F0F0]/80">Сброс данных</span>
           <svg class="w-[18px] h-[18px] stroke-[#E5E5E5]/40 stroke-2 fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
@@ -693,10 +807,77 @@
         </div>
       </div>
 
+      <!-- ЭКРАН 5.3: СБРОС ДАННЫХ -->
+      <div id="view-reset-data" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <button id="reset-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-75 transition-opacity w-fit select-none py-2 pr-4 -ml-2 -mt-2">
+          <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
+        </button>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <h2 class="font-onest font-semibold text-[24px] text-[#E5E5E5] leading-tight select-none">Сброс данных</h2>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <!-- Плашка текущей сессии -->
+        <div class="w-full h-[100px] bg-[#131B28] rounded-[20px] px-[20px] py-[20px] flex items-center justify-between shrink-0 shadow-sm box-border">
+          <div class="flex flex-col justify-center" style="gap: 14px;">
+            <span id="top-session-title" class="font-onest font-medium text-[18px] text-[#F0F0F0] leading-none transition-all duration-300">Текущая сессия №4</span>
+            <span id="top-session-date" class="font-onest text-[14px] text-[#F0F0F0]/40 leading-none transition-all duration-300">Создана: 04.03.2026</span>
+          </div>
+          <div style="width: 106px; height: 40px; background: rgba(148, 253, 23, 0.07); border: 1px solid rgba(148, 253, 23, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span class="font-onest font-medium text-[16px] text-[#94FD17] leading-none">Активна</span>
+          </div>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <!-- Кнопка завершить и создать новую -->
+        <button id="finish-and-create-new-btn" style="width: 100%; height: 52px; background: #131B28; border-radius: 9999px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer;" class="active:scale-[0.98] transition-transform shadow-sm">
+          <span class="font-onest font-medium text-[16px] text-[#FF6434] leading-none">Завершить и создать новую</span>
+        </button>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <!-- Архив сессий -->
+        <div id="archive-section-wrapper" class="archive-container-anim hidden-archive flex flex-col w-full">
+          <h3 class="font-onest font-semibold text-[18px] text-[#F0F0F0] leading-none select-none">Архив</h3>
+          <div class="h-[20px] shrink-0"></div>
+          
+          <div id="archive-big-plate" class="w-full bg-[#1E2632] rounded-[20px] overflow-hidden flex flex-col shadow-sm">
+            <!-- Динамически наполняемые ячейки сессий -->
+          </div>
+        </div>
+
+        <div class="h-[32px] shrink-0"></div>
+
+        <p class="font-onest font-medium text-[12px] text-[#F0F0F0]/20 text-center leading-relaxed select-none px-4">
+          Сброс обнулит текущий прогресс, но сохранит сессию в архиве. Вы сможете вернуться к ней позже
+        </p>
+      </div>
+
+      <!-- ЭКРАН 5.2: ОБРАТНАЯ СВЯЗЬ -->
+      <div id="view-feedback" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
+        <button id="feedback-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-75 transition-opacity w-fit select-none py-2 pr-4 -ml-2 -mt-2">
+          <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
+        </button>
+
+        <div class="flex-1 flex flex-col items-center justify-center text-center px-4 my-auto">
+          <h1 style="font-family: 'Onest', sans-serif; font-weight: 600; font-size: 26px;" class="text-textWhite leading-tight mb-4">Булка в рот — растет живот! :D</h1>
+          <p style="font-family: 'Onest', sans-serif; font-weight: 500; font-size: 14px;" class="text-textWhite/70 leading-relaxed mb-8 max-w-[320px]">Привет! Это Дарья, если у тебя есть предложения или ты нашел ошибку в работе приложения — смело пиши мне.</p>
+          <a href="https://t.me/design_daryaaa" target="_blank" style="background-color: #2481cc; box-shadow: 0 0 20px rgba(36, 129, 204, 0.4);" class="w-full max-w-[280px] h-[52px] rounded-full flex items-center justify-center gap-2.5 text-white font-onest font-semibold text-[15px] active:scale-[0.98] transition-all">
+            <i class="bi bi-telegram text-[20px]"></i>
+            <span>@design_daryaaa</span>
+          </a>
+        </div>
+      </div>
+
       <!-- ЭКРАН 5.1: ДЕТАЛЬНАЯ СТРАНИЦА АККАУНТА -->
       <div id="view-account-details" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
-        <button id="account-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
-          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <button id="account-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-75 transition-opacity w-fit select-none py-2 pr-4 -ml-2 -mt-2">
+          <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
         </button>
 
@@ -705,7 +886,7 @@
 
         <div class="h-[28px] shrink-0"></div>
         <div class="w-[100px] h-[100px] rounded-full bg-[#1E2632] mx-auto overflow-hidden flex items-center justify-center border border-white/10 shadow-lg">
-          <img id="account-page-avatar" src="https://emojigraph.org/media/144/apple/hear-no-evil-monkey_1f649.png" class="w-[50px] h-[50px] object-contain pointer-events-none" />
+          <img id="account-page-avatar" src="https://emojigraph.org/media/144/apple/octopus_1f419.png" class="w-[60px] h-[60px] object-contain pointer-events-none" />
         </div>
 
         <div class="h-[28px] shrink-0"></div>
@@ -729,10 +910,10 @@
         </div>
       </div>
 
-      <!-- ЭКРАН 6: ВИДЖЕТЫ -->
+      <!-- ЭКРАН 6: ВИДЖЕТЫ (ТОЛЬКО ВЕС, ВОДА, ШАГИ) -->
       <div id="view-widgets" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
-        <button id="widgets-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
-          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <button id="widgets-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-75 transition-opacity w-fit select-none py-2 pr-4 -ml-2 -mt-2">
+          <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
         </button>
 
@@ -745,39 +926,32 @@
         <div class="h-[32px] shrink-0"></div>
         <div class="w-full bg-cardBg rounded-[16px] overflow-hidden flex flex-col shrink-0 shadow-sm divide-y divide-white/5">
           <div class="p-[18px] flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path><path d="M9 3h6"></path></svg>
-              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Вес</span>
+            <div class="flex items-center" style="gap: 12px;">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[1.8] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="4" />
+                <path d="M8 8h8v3H8z" />
+                <circle cx="12" cy="16" r="1.5" />
+              </svg>
+              <span class="font-onest font-medium text-[14px] text-[#F0F0F0]/80">Вес</span>
             </div>
             <button data-widget-key="weight" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
           </div>
           <div class="p-[18px] flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"></circle><path d="M10 22l2-7 3 3v4"></path><path d="M14 13l2-3-4-2-3 4 2 3"></path></svg>
-              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Шаги</span>
+            <div class="flex items-center" style="gap: 12px;">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[1.8] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              <span class="font-onest font-medium text-[14px] text-[#F0F0F0]/80">Вода</span>
+            </div>
+            <button data-widget-key="water" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
+          </div>
+          <div class="p-[18px] flex items-center justify-between">
+            <div class="flex items-center" style="gap: 12px;">
+              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[1.8] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 16v-2.38C4 11.5 5.5 9 8 9h1c1.5 0 3 1.5 3 3.5V16a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3Z"/>
+                <path d="M12 11V8.62C12 6.5 13.5 4 16 4h1c1.5 0 3 1.5 3 3.5V11a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3Z"/>
+              </svg>
+              <span class="font-onest font-medium text-[14px] text-[#F0F0F0]/80">Шаги</span>
             </div>
             <button data-widget-key="steps" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
-          </div>
-          <div class="p-[18px] flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5l3.5-7 3 2.5"></path><path d="M5.5 17.5l4-7 4.5 1"></path></svg>
-              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Активность</span>
-            </div>
-            <button data-widget-key="activity" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
-          </div>
-          <div class="p-[18px] flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"></path></svg>
-              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Прогресс силовых</span>
-            </div>
-            <button data-widget-key="strength" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
-          </div>
-          <div class="p-[18px] flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="w-[21px] h-[21px] stroke-[#F0F0F0]/80 stroke-[2] fill-none shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span class="ml-[16px] font-onest font-medium text-[14px] text-[#F0F0F0]/80">Заметки</span>
-            </div>
-            <button data-widget-key="notes" class="ios-switch widget-toggle-btn"><div class="thumb"></div></button>
           </div>
         </div>
 
@@ -787,8 +961,8 @@
 
       <!-- ЭКРАН 7: ОФОРМЛЕНИЕ -->
       <div id="view-styling" style="padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); padding-top: calc(20px + env(safe-area-inset-top, 0px));" class="view-page absolute inset-0 px-5 overflow-y-auto scroll-container no-scrollbar flex flex-col">
-        <button id="styling-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-70 transition-opacity w-fit select-none">
-          <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <button id="styling-back-btn" class="flex items-center gap-1.5 text-accentGreen active:opacity-75 transition-opacity w-fit select-none py-2 pr-4 -ml-2 -mt-2">
+          <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           <span class="font-onest font-medium text-[16px] leading-none">Назад</span>
         </button>
 
@@ -860,9 +1034,9 @@
 
     </main>
 
-    <!-- ПОЛНОЭКРАННАЯ ШТОРКА ДОБАВЛЕНИЯ БЛЮД -->
-    <div id="meals-builder-curtain" class="slide-curtain hidden-curtain absolute inset-0 bg-appBg z-50 flex flex-col overflow-hidden">
-      <div style="padding-top: calc(16px + env(safe-area-inset-bottom, 0px));" class="w-full px-5 flex justify-end shrink-0">
+    <!-- ПОЛНОЭКРАННАЯ ШТОРКА ДОБАВЛЕНИЯ БЛЮД (слой z-index: 60) -->
+    <div id="meals-builder-curtain" class="slide-curtain hidden-curtain absolute inset-0 bg-appBg flex flex-col overflow-hidden" style="z-index: 60;">
+      <div style="padding-top: calc(16px + env(safe-area-inset-top, 0px));" class="w-full px-5 flex justify-end shrink-0">
         <button id="close-curtain-btn" aria-label="Закрыть" class="text-textWhite/30 hover:text-textWhite p-2 transition-colors">
           <svg class="w-6 h-6 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -879,10 +1053,10 @@
         </div>
 
         <div class="flex items-center justify-center gap-[10px] w-full shrink-0 mt-[8px]">
-          <button id="templates-doc-btn" class="w-[44px] h-[44px] rounded-full bg-textWhite flex items-center justify-center text-appBg shadow-md active:scale-95 transition-transform" title="Сохраненные продукты">
+          <button id="templates-doc-btn" class="w-[44px] h-[44px] rounded-full bg-textWhite flex items-center justify-center text-appBg shadow-md active:scale-95 transition-transform cursor-pointer" title="Сохраненные продукты">
             <i class="bi bi-file-earmark-text text-[18px]"></i>
           </button>
-          <button id="add-template-row-btn" class="w-[44px] h-[44px] rounded-full bg-accentOrange flex items-center justify-center text-white shadow-md active:scale-95 transition-transform" title="Добавить шаблон">
+          <button id="add-template-row-btn" class="w-[44px] h-[44px] rounded-full bg-accentOrange flex items-center justify-center text-white shadow-md active:scale-95 transition-transform cursor-pointer" title="Добавить шаблон">
             <div id="plus-icon-holder" class="btn-icon-wrapper flex items-center justify-center">
               <svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </div>
@@ -890,7 +1064,7 @@
         </div>
       </div>
 
-      <div style="padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));" class="w-full bg-cardBg rounded-t-[24px] pt-5 px-5 shadow-2xl flex flex-col shrink-0 border-t border-white/5 z-20">
+      <div style="padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 65; pointer-events: auto !important;" class="w-full bg-cardBg rounded-t-[24px] pt-5 px-5 shadow-2xl flex flex-col shrink-0 border-t border-white/5 relative">
         <div class="flex items-center justify-center gap-[28px] select-none">
           <div class="flex items-baseline gap-1">
             <span id="curtain-total-k" class="font-rubik font-medium text-[16px] text-textWhite transition-all">0</span>
@@ -912,14 +1086,14 @@
 
         <div class="h-[18px] shrink-0"></div>
 
-        <button id="curtain-save-all-btn" class="w-full h-[50px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">
+        <button id="curtain-save-all-btn" style="pointer-events: auto !important; cursor: pointer !important; position: relative; z-index: 70;" class="w-full h-[50px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">
           Сохранить
         </button>
       </div>
     </div>
 
-    <!-- ШТОРКА ДЛЯ СОХРАНЕННЫХ ПРОДУКТОВ -->
-    <div id="saved-products-sheet" class="ios-sheet sheet-hidden absolute inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-sm">
+    <!-- ШТОРКА ВЫБОРА ИЗ ДНЕВНИКА (слой z-index: 80 - выше экрана добавления блюд) -->
+    <div id="saved-products-sheet" class="ios-sheet sheet-hidden absolute inset-0 flex flex-col justify-end bg-black/60 backdrop-blur-sm" style="z-index: 80;">
       <div id="saved-sheet-content" class="w-full h-[75%] bg-cardBg rounded-t-[32px] pt-0 px-6 pb-6 flex flex-col shadow-2xl border-t border-white/10 relative overflow-hidden select-none">
         
         <div id="sheet-drag-handle" class="w-full flex flex-col items-center justify-center shrink-0 cursor-grab active:cursor-grabbing" style="height: 34px;">
@@ -937,8 +1111,8 @@
       </div>
     </div>
 
-    <!-- ПОПАПЫ -->
-    <div id="edit-saved-product-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+    <!-- ПОПАПЫ (слой z-index: 90) -->
+    <div id="edit-saved-product-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-5" style="z-index: 90;">
       <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
         <button id="close-edit-saved-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
           <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -952,10 +1126,10 @@
           <div class="flex flex-col gap-1.5">
             <label class="font-onest text-xs text-textWhite/50 px-1">КБЖУ на 100 гр</label>
             <div class="grid grid-cols-4 gap-2">
-              <input id="edit-saved-k-input" type="text" inputmode="decimal" placeholder="К" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
-              <input id="edit-saved-b-input" type="text" inputmode="decimal" placeholder="Б" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
-              <input id="edit-saved-zh-input" type="text" inputmode="decimal" placeholder="Ж" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
-              <input id="edit-saved-u-input" type="text" inputmode="decimal" placeholder="У" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-k-input" type="text" inputmode="decimal" maxlength="4" placeholder="К" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-b-input" type="text" inputmode="decimal" maxlength="3" placeholder="Б" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-zh-input" type="text" inputmode="decimal" maxlength="3" placeholder="Ж" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-saved-u-input" type="text" inputmode="decimal" maxlength="3" placeholder="У" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
             </div>
           </div>
         </div>
@@ -968,7 +1142,19 @@
       </div>
     </div>
 
-    <div id="edit-history-product-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+    <!-- ПОПАП ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ СЕССИИ -->
+    <div id="delete-session-confirm-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-5" style="z-index: 100;">
+      <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5 text-center">
+        <h3 class="font-onest font-bold text-xl text-textWhite mb-2">Удаление сессии</h3>
+        <p class="font-onest text-sm text-textWhite/60 mb-6">Вы уверены, что хотите удалить сессию? Ведь она не восстановится уже никак.</p>
+        <div class="flex gap-3">
+          <button id="cancel-delete-session-btn" class="flex-1 h-[52px] bg-[#293342] text-textWhite rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform">Отмена</button>
+          <button id="confirm-delete-session-btn" class="flex-1 h-[52px] bg-overRed text-white rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-overRed/20">Удалить</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="edit-history-product-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-5" style="z-index: 90;">
       <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
         <button id="close-edit-history-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
           <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -982,17 +1168,17 @@
             </div>
             <div class="flex flex-col w-[90px]">
               <span class="font-onest font-normal text-[12px] text-textWhite/50 mb-1">Вес</span>
-              <input id="edit-history-weight-input" type="text" inputmode="decimal" placeholder="гр/мл" class="w-full h-[48px] bg-[#293342] rounded-xl text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/30 focus:outline-none border-none" />
+              <input id="edit-history-weight-input" type="text" inputmode="decimal" maxlength="5" placeholder="гр/мл" class="w-full h-[48px] bg-[#293342] rounded-xl text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/30 focus:outline-none border-none" />
             </div>
           </div>
 
           <div class="flex flex-col w-full">
             <span class="font-onest font-normal text-[12px] text-textWhite/50 mb-2">КБЖУ на 100 гр/мл</span>
             <div class="grid grid-cols-4 gap-2">
-              <input id="edit-history-k100-input" type="text" inputmode="decimal" placeholder="К" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
-              <input id="edit-history-b100-input" type="text" inputmode="decimal" placeholder="Б" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
-              <input id="edit-history-zh100-input" type="text" inputmode="decimal" placeholder="Ж" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
-              <input id="edit-history-u100-input" type="text" inputmode="decimal" placeholder="У" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-k100-input" type="text" inputmode="decimal" maxlength="4" placeholder="К" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-b100-input" type="text" inputmode="decimal" maxlength="3" placeholder="Б" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-zh100-input" type="text" inputmode="decimal" maxlength="3" placeholder="Ж" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
+              <input id="edit-history-u100-input" type="text" inputmode="decimal" maxlength="3" placeholder="У" class="h-[48px] bg-[#293342] rounded-xl text-center font-rubik text-sm text-textWhite focus:outline-none border-none" />
             </div>
 
             <div class="grid grid-cols-4 gap-2 mt-[10px]">
@@ -1044,7 +1230,7 @@
       </div>
     </nav>
 
-    <div id="norm-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+    <div id="norm-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-5" style="z-index: 90;">
       <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
         <button id="close-norm-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
           <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1073,23 +1259,42 @@
       </div>
     </div>
 
-    <div id="profile-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+    <!-- ПОПАП РЕДАКТИРОВАНИЯ ПРОФИЛЯ -->
+    <div id="profile-modal" class="modal-overlay absolute inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-5" style="z-index: 90;">
       <div class="modal-card bg-cardBg w-full rounded-[24px] p-6 shadow-2xl relative border border-white/5">
         <button id="close-profile-modal-btn" class="absolute top-5 right-5 text-textWhite/40 hover:text-textWhite p-1 transition-colors">
           <svg class="w-5 h-5 stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         <h3 class="font-onest font-bold text-xl text-textWhite mb-5">Редактировать профиль</h3>
         <div class="flex flex-col gap-4 mb-6">
+          <div id="preset-avatars-grid" class="grid grid-cols-5 gap-2 w-full">
+            <div class="avatar-preset-item h-[55px] rounded-xl bg-[#293342] flex items-center justify-center cursor-pointer active:scale-95 transition-all" data-src="https://emojigraph.org/media/144/apple/cherry-blossom_1f338.png">
+              <img src="https://emojigraph.org/media/144/apple/cherry-blossom_1f338.png" class="w-6 h-6 object-contain pointer-events-none" />
+            </div>
+            <div class="avatar-preset-item h-[55px] rounded-xl bg-[#293342] flex items-center justify-center cursor-pointer active:scale-95 transition-all ring-2 ring-accentGreen" data-src="https://emojigraph.org/media/144/apple/octopus_1f419.png">
+              <img src="https://emojigraph.org/media/144/apple/octopus_1f419.png" class="w-6 h-6 object-contain pointer-events-none" />
+            </div>
+            <div class="avatar-preset-item h-[55px] rounded-xl bg-[#293342] flex items-center justify-center cursor-pointer active:scale-95 transition-all" data-src="https://emojigraph.org/media/144/apple/flexed-biceps-light-skin-tone_1f4aa-1f3fb.png">
+              <img src="https://emojigraph.org/media/144/apple/flexed-biceps-light-skin-tone_1f4aa-1f3fb.png" class="w-6 h-6 object-contain pointer-events-none" />
+            </div>
+            <div class="avatar-preset-item h-[55px] rounded-xl bg-[#293342] flex items-center justify-center cursor-pointer active:scale-95 transition-all" data-src="https://emojigraph.org/media/144/apple/polar-bear_1f43b-200d-2744-fe0f.png">
+              <img src="https://emojigraph.org/media/144/apple/polar-bear_1f43b-200d-2744-fe0f.png" class="w-6 h-6 object-contain pointer-events-none" />
+            </div>
+            <div class="avatar-preset-item h-[55px] rounded-xl bg-[#293342] flex items-center justify-center cursor-pointer active:scale-95 transition-all" data-src="https://emojigraph.org/media/144/apple/green-salad_1f957.png">
+              <img src="https://emojigraph.org/media/144/apple/green-salad_1f957.png" class="w-6 h-6 object-contain pointer-events-none" />
+            </div>
+          </div>
+
           <div class="flex flex-col gap-1.5">
-            <label class="font-onest text-xs text-textWhite/50 px-1">Фотография</label>
             <input id="profile-file-input" type="file" accept="image/*" class="hidden" />
-            <button id="trigger-upload-btn" type="button" class="w-full h-[48px] bg-cardInput rounded-xl px-4 flex items-center justify-center gap-2 border border-white/5 text-textWhite/80 font-onest text-sm active:scale-[0.99] transition-transform">
-              <i class="bi bi-image"></i>
+            <button id="trigger-upload-btn" type="button" style="height: 55px; background-color: #293342; border: none;" class="w-full rounded-xl px-4 flex items-center justify-center gap-2 text-textWhite/80 font-onest text-sm active:scale-[0.99] transition-transform">
+              <i class="bi bi-image text-lg"></i>
               <span>Выбрать из галереи</span>
             </button>
           </div>
-          <div id="photo-crop-preview-container" class="hidden flex flex-col items-center gap-2 mt-2">
-            <span class="font-onest text-xs text-textWhite/50">Настройте масштаб фото</span>
+
+          <div id="photo-crop-preview-container" class="hidden flex flex-col items-center gap-2 mt-1">
+            <span class="font-onest text-xs text-textWhite/50">Настройте масштаб и расположение фото</span>
             <div class="relative w-24 h-24 rounded-full overflow-hidden border-2 border-accentGreen shadow-inner bg-black">
               <img id="crop-image-preview" src="" class="absolute max-none cursor-grab active:cursor-grabbing origin-center select-none" style="width: 100%; height: auto; transform: scale(1); left: 0px; top: 0px;" />
             </div>
@@ -1098,7 +1303,7 @@
 
           <div class="flex flex-col gap-1.5">
             <label class="font-onest text-xs text-textWhite/50 px-1">Ваше имя</label>
-            <input id="edit-profile-name-input" type="text" maxlength="26" placeholder="Введите имя" class="w-full h-[48px] bg-cardInput rounded-xl px-4 font-onest text-[16px] text-textWhite placeholder:text-textWhite/40 focus:outline-none border border-white/5" />
+            <input id="edit-profile-name-input" type="text" maxlength="26" placeholder="Введите имя" style="height: 55px; background-color: #293342; border: none;" class="w-full rounded-xl px-4 font-onest text-[16px] text-textWhite placeholder:text-textWhite/40 focus:outline-none" />
           </div>
         </div>
         <button id="save-profile-btn" class="w-full h-[52px] bg-accentGreen text-[#050F1B] rounded-full font-onest font-medium text-[14px] flex items-center justify-center active:scale-[0.98] transition-transform shadow-lg shadow-accentGreen/20">Сохранить</button>
@@ -1128,6 +1333,13 @@
     let selectedDate = new Date(REAL_TODAY);
     let viewMonthDate = new Date(REAL_TODAY);
     let isCalendarOpen = false;
+
+    // Менеджер сессий
+    let sessionsList = [
+      { id: 4, name: "Текущая сессия №4", created: "04.03.2026", active: true }
+    ];
+    let sessionCounter = 4;
+    let pendingDeleteSessionId = null;
 
     const historicalNormsStore = {};
     const dayDataStore = {};
@@ -1290,8 +1502,28 @@
       document.getElementById('edit-history-calc-u').textContent = String(calcU).replace('.', ',');
     }
 
-    [editHistoryWeightInput, editHistoryK100Input, editHistoryB100Input, editHistoryZh100Input, editHistoryU100Input].forEach(inp => {
-      inp.addEventListener('input', recalcHistoryEditModal);
+    editHistoryWeightInput.addEventListener('input', () => {
+      let val = editHistoryWeightInput.value.replace(',', '.').replace(/[^0-9.]/g, '');
+      const parts = val.split('.');
+      if (parts[0].length > 5) parts[0] = parts[0].slice(0, 5);
+      editHistoryWeightInput.value = parts.join('.');
+      recalcHistoryEditModal();
+    });
+
+    editHistoryK100Input.addEventListener('input', () => {
+      let val = editHistoryK100Input.value.replace(/[^0-9]/g, '');
+      if (val.length > 4) val = val.slice(0, 4);
+      editHistoryK100Input.value = val;
+      recalcHistoryEditModal();
+    });
+
+    [editHistoryB100Input, editHistoryZh100Input, editHistoryU100Input].forEach(inp => {
+      inp.addEventListener('input', () => {
+        let val = inp.value.replace(/[^0-9]/g, '');
+        if (val.length > 3) val = val.slice(0, 3);
+        inp.value = val;
+        recalcHistoryEditModal();
+      });
     });
 
     saveEditedHistoryProductBtn.addEventListener('click', () => {
@@ -1573,6 +1805,7 @@
             renderDateSlider(true);
             updateDateDisplay();
             updateMetrics();
+            renderProfileWidgets();
           }, 120);
         });
 
@@ -1620,12 +1853,14 @@
     const calendarPopup = document.getElementById('calendar-popup');
     const calendarBackdrop = document.getElementById('calendar-backdrop');
     const openCalendarBtn = document.getElementById('open-calendar-btn');
+    const floatingCalendarBtn = document.getElementById('floating-calendar-btn');
     const calPrevMonth = document.getElementById('cal-prev-month');
     const calNextMonth = document.getElementById('cal-next-month');
     const calHeaderTitle = document.getElementById('cal-header-title');
     const calDaysContainer = document.getElementById('calendar-days-container');
 
     function toggleCalendarPopup() { if (isCalendarOpen) closeCalendar(); else openCalendar(); }
+    
     function openCalendar() {
       isCalendarOpen = true;
       viewMonthDate = new Date(selectedDate);
@@ -1633,29 +1868,41 @@
 
       const btnRect = openCalendarBtn.getBoundingClientRect();
       const viewportRect = document.getElementById('app-viewport').getBoundingClientRect();
-      // Возвращаем календарь наверх под кнопку с подъемом на 4 пикселя (было +20, стало +16)
-      const relativeTop = btnRect.bottom - viewportRect.top + 16;
-      calendarPopup.style.top = `${relativeTop}px`;
+      
+      const relativeTop = btnRect.top - viewportRect.top;
+      const relativeLeft = btnRect.left - viewportRect.left;
+      
+      floatingCalendarBtn.style.top = `${relativeTop}px`;
+      floatingCalendarBtn.style.left = `${relativeLeft}px`;
 
-      openCalendarBtn.classList.remove('bg-cardBg', 'text-textWhite');
-      openCalendarBtn.classList.add('bg-btnInvert', 'text-[#050F1B]');
       calendarBackdrop.classList.remove('opacity-0', 'pointer-events-none');
       calendarBackdrop.classList.add('opacity-100', 'pointer-events-auto');
+
+      floatingCalendarBtn.classList.remove('opacity-0', 'pointer-events-none');
+      floatingCalendarBtn.classList.add('opacity-100', 'pointer-events-auto');
+
+      const popupRelativeTop = btnRect.bottom - viewportRect.top + 16;
+      calendarPopup.style.top = `${popupRelativeTop}px`;
       calendarPopup.classList.remove('closed');
       calendarPopup.classList.add('open');
     }
+
     function closeCalendar() {
       isCalendarOpen = false;
-      openCalendarBtn.classList.remove('bg-btnInvert', 'text-[#050F1B]');
-      openCalendarBtn.classList.add('bg-cardBg', 'text-textWhite');
       calendarBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
       calendarBackdrop.classList.add('opacity-0', 'pointer-events-none');
+
+      floatingCalendarBtn.classList.remove('opacity-100', 'pointer-events-auto');
+      floatingCalendarBtn.classList.add('opacity-0', 'pointer-events-none');
+
       calendarPopup.classList.remove('open');
       calendarPopup.classList.add('closed');
     }
 
     openCalendarBtn.addEventListener('click', toggleCalendarPopup);
+    floatingCalendarBtn.addEventListener('click', toggleCalendarPopup);
     calendarBackdrop.addEventListener('click', closeCalendar);
+    
     calPrevMonth.addEventListener('click', (e) => { e.stopPropagation(); viewMonthDate.setMonth(viewMonthDate.getMonth() - 1); renderCalendarPopupDays(); });
     calNextMonth.addEventListener('click', (e) => { e.stopPropagation(); viewMonthDate.setMonth(viewMonthDate.getMonth() + 1); renderCalendarPopupDays(); });
 
@@ -1709,6 +1956,7 @@
         renderDateSlider(true);
         updateDateDisplay();
         updateMetrics();
+        renderProfileWidgets();
         setTimeout(closeCalendar, 350);
       });
       return btn;
@@ -1723,11 +1971,13 @@
     const viewRecipes = document.getElementById('view-recipes');
     const viewProfile = document.getElementById('view-profile');
     const viewSettings = document.getElementById('view-settings');
+    const viewResetData = document.getElementById('view-reset-data');
+    const viewFeedback = document.getElementById('view-feedback');
     const viewWidgets = document.getElementById('view-widgets');
     const viewStyling = document.getElementById('view-styling');
     const viewAccountDetails = document.getElementById('view-account-details');
 
-    const allViews = [viewHome, viewRecipes, viewProfile, viewSettings, viewWidgets, viewStyling, viewAccountDetails];
+    const allViews = [viewHome, viewRecipes, viewProfile, viewSettings, viewResetData, viewFeedback, viewWidgets, viewStyling, viewAccountDetails];
 
     function switchTab(targetTab) {
       closeCalendar();
@@ -1740,9 +1990,23 @@
         viewRecipes.classList.add('page-active'); 
         renderRecipesScreenList();
       }
-      else if (targetTab === 'profile') { navBtnProfile.classList.add('active'); viewProfile.classList.add('page-active'); }
+      else if (targetTab === 'profile') { 
+        navBtnProfile.classList.add('active'); 
+        viewProfile.classList.add('page-active'); 
+        renderProfileWidgets();
+      }
       else if (targetTab === 'settings') { navBtnProfile.classList.add('active'); viewSettings.classList.add('page-active'); }
-      else if (targetTab === 'widgets') { navBtnProfile.classList.add('active'); viewWidgets.classList.add('page-active'); }
+      else if (targetTab === 'reset-data') { 
+        navBtnProfile.classList.add('active'); 
+        viewResetData.classList.add('page-active'); 
+        renderResetDataScreen();
+      }
+      else if (targetTab === 'feedback') { navBtnProfile.classList.add('active'); viewFeedback.classList.add('page-active'); }
+      else if (targetTab === 'widgets') { 
+        navBtnProfile.classList.add('active'); 
+        viewWidgets.classList.add('page-active'); 
+        syncWidgetsSwitchUI();
+      }
       else if (targetTab === 'styling') { navBtnProfile.classList.add('active'); viewStyling.classList.add('page-active'); }
       else if (targetTab === 'account') { navBtnProfile.classList.add('active'); viewAccountDetails.classList.add('page-active'); }
     }
@@ -1753,6 +2017,10 @@
 
     document.getElementById('profile-settings-btn').addEventListener('click', () => switchTab('settings'));
     document.getElementById('settings-back-btn').addEventListener('click', () => switchTab('profile'));
+    document.getElementById('settings-goto-reset-btn').addEventListener('click', () => switchTab('reset-data'));
+    document.getElementById('reset-back-btn').addEventListener('click', () => switchTab('settings'));
+    document.getElementById('settings-feedback-btn').addEventListener('click', () => switchTab('feedback'));
+    document.getElementById('feedback-back-btn').addEventListener('click', () => switchTab('settings'));
     document.getElementById('add-widgets-btn').addEventListener('click', () => switchTab('widgets'));
     document.getElementById('settings-goto-widgets-btn').addEventListener('click', () => switchTab('widgets'));
     document.getElementById('widgets-back-btn').addEventListener('click', () => switchTab('settings'));
@@ -1760,6 +2028,216 @@
     document.getElementById('styling-back-btn').addEventListener('click', () => switchTab('settings'));
     document.getElementById('settings-account-card-btn').addEventListener('click', () => switchTab('account'));
     document.getElementById('account-back-btn').addEventListener('click', () => switchTab('settings'));
+
+    // Логика экрана Сброс Данных и сессий
+    const finishAndCreateNewBtn = document.getElementById('finish-and-create-new-btn');
+    const archiveSectionWrapper = document.getElementById('archive-section-wrapper');
+    const archiveBigPlate = document.getElementById('archive-big-plate');
+    const deleteSessionConfirmModal = document.getElementById('delete-session-confirm-modal');
+    const cancelDeleteSessionBtn = document.getElementById('cancel-delete-session-btn');
+    const confirmDeleteSessionBtn = document.getElementById('confirm-delete-session-btn');
+    const topSessionTitle = document.getElementById('top-session-title');
+    const topSessionDate = document.getElementById('top-session-date');
+
+    function renderResetDataScreen(animateMove = false, activatedId = null) {
+      const activeSession = sessionsList.find(s => s.active) || sessionsList[0];
+      topSessionTitle.textContent = activeSession.name;
+      topSessionDate.textContent = `Создана: ${activeSession.created}`;
+
+      const inactiveSessions = sessionsList.filter(s => !s.active);
+      if (inactiveSessions.length === 0) {
+        archiveSectionWrapper.classList.add('hidden-archive');
+      } else {
+        archiveSectionWrapper.classList.remove('hidden-archive');
+        archiveBigPlate.innerHTML = '';
+
+        const activeItem = sessionsList.find(s => s.active);
+        if (activeItem) {
+          const activeCell = document.createElement('div');
+          activeCell.className = 'archive-cell-item w-full flex items-center justify-between box-border';
+          activeCell.style.cssText = 'height: 60px; padding: 0 18px; background: rgba(19, 27, 40, 0.08);';
+          activeCell.innerHTML = `
+            <div class="flex items-center" style="gap: 16px;">
+              <span class="font-rubik text-[12px] text-[#F0F0F0]/40">${activeItem.created}</span>
+              <span class="font-onest font-semibold text-[14px] text-[#94FD17]">${activeItem.name}</span>
+            </div>
+            <div class="ios-switch active switch-green pointer-events-none"><div class="thumb"></div></div>
+          `;
+          archiveBigPlate.appendChild(activeCell);
+        }
+
+        inactiveSessions.forEach((s) => {
+          if (activeItem) {
+            const line = document.createElement('div');
+            line.className = 'w-full h-[1px] bg-[#1E2631] shrink-0';
+            archiveBigPlate.appendChild(line);
+          }
+
+          const cell = document.createElement('div');
+          cell.className = 'archive-cell-item w-full flex items-center justify-between box-border relative overflow-hidden';
+          cell.setAttribute('data-id', s.id);
+          cell.style.cssText = 'height: 60px; padding: 0 18px; background: #131B28; cursor: pointer;';
+          cell.innerHTML = `
+            <div class="flex items-center" style="gap: 16px;">
+              <span class="font-rubik text-[12px] text-[#F0F0F0]/40">${s.created}</span>
+              <span class="font-onest font-normal text-[14px] text-[#F0F0F0]/80">${s.name}</span>
+            </div>
+            <button class="ios-switch inactive-session-switch" data-id="${s.id}"><div class="thumb"></div></button>
+          `;
+
+          let startX = 0;
+          let currentTranslate = 0;
+          let isSwiping = false;
+
+          cell.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isSwiping = true;
+            cell.style.transition = 'none';
+          }, {passive: true});
+
+          cell.addEventListener('touchmove', (e) => {
+            if (!isSwiping) return;
+            const diff = e.touches[0].clientX - startX;
+            if (diff < 0) {
+              currentTranslate = Math.max(-90, diff);
+              cell.style.transform = `translateX(${currentTranslate}px)`;
+            }
+          }, {passive: true});
+
+          cell.addEventListener('touchend', () => {
+            if (!isSwiping) return;
+            isSwiping = false;
+            cell.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (currentTranslate < -50) {
+              cell.style.transform = 'translateX(-80px)';
+              pendingDeleteSessionId = s.id;
+              deleteSessionConfirmModal.classList.add('modal-active');
+            } else {
+              cell.style.transform = 'translateX(0px)';
+            }
+            currentTranslate = 0;
+          });
+
+          cell.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isSwiping = true;
+            cell.style.transition = 'none';
+          });
+
+          window.addEventListener('mousemove', (e) => {
+            if (!isSwiping) return;
+            const diff = e.clientX - startX;
+            if (diff < 0) {
+              currentTranslate = Math.max(-90, diff);
+              cell.style.transform = `translateX(${currentTranslate}px)`;
+            }
+          });
+
+          window.addEventListener('mouseup', () => {
+            if (!isSwiping) return;
+            isSwiping = false;
+            cell.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (currentTranslate < -50) {
+              cell.style.transform = 'translateX(-80px)';
+              pendingDeleteSessionId = s.id;
+              deleteSessionConfirmModal.classList.add('modal-active');
+            } else {
+              cell.style.transform = 'translateX(0px)';
+            }
+            currentTranslate = 0;
+          });
+
+          const swBtn = cell.querySelector('.inactive-session-switch');
+          swBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            swBtn.classList.add('active', 'switch-green');
+            setTimeout(() => {
+              activateSessionWithAnimation(s.id);
+            }, 250);
+          });
+
+          archiveBigPlate.appendChild(cell);
+        });
+
+        if (animateMove && activatedId !== null) {
+          const targetCell = archiveBigPlate.querySelector(`[data-id="${activatedId}"]`);
+          if (targetCell) {
+            targetCell.style.transform = 'translateY(-45px)';
+            targetCell.style.backgroundColor = '#1E2632';
+            requestAnimationFrame(() => {
+              targetCell.style.transition = 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease';
+              targetCell.style.transform = 'translateY(0px)';
+              targetCell.style.backgroundColor = '#131B28';
+            });
+          }
+        }
+      }
+    }
+
+    function activateSessionWithAnimation(id) {
+      const targetSession = sessionsList.find(s => s.id === id);
+      if (!targetSession) return;
+
+      sessionsList.forEach(s => {
+        if (s.id === id) s.active = true;
+        else s.active = false;
+      });
+
+      // Плавная анимация обновления верхней плашки
+      topSessionTitle.style.transform = 'translateY(-6px)';
+      topSessionTitle.style.opacity = '0';
+      topSessionDate.style.transform = 'translateY(-6px)';
+      topSessionDate.style.opacity = '0';
+
+      setTimeout(() => {
+        renderResetDataScreen(true, id);
+        topSessionTitle.style.transform = 'translateY(6px)';
+        topSessionDate.style.transform = 'translateY(6px)';
+        requestAnimationFrame(() => {
+          topSessionTitle.style.transition = 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+          topSessionTitle.style.transform = 'translateY(0px)';
+          topSessionTitle.style.opacity = '1';
+          topSessionDate.style.transition = 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+          topSessionDate.style.transform = 'translateY(0px)';
+          topSessionDate.style.opacity = '1';
+        });
+      }, 180);
+    }
+
+    finishAndCreateNewBtn.addEventListener('click', () => {
+      if (sessionsList.length >= 10) {
+        alert('Можно создать максимум 10 сессий.');
+        return;
+      }
+      sessionsList.forEach(s => s.active = false);
+
+      sessionCounter++;
+      const todayStr = String(REAL_TODAY.getDate()).padStart(2, '0') + '.' + String(REAL_TODAY.getMonth() + 1).padStart(2, '0') + '.' + REAL_TODAY.getFullYear();
+      
+      sessionsList.unshift({
+        id: sessionCounter,
+        name: `Текущая сессия №${sessionCounter}`,
+        created: todayStr,
+        active: true
+      });
+
+      renderResetDataScreen();
+    });
+
+    cancelDeleteSessionBtn.addEventListener('click', () => {
+      deleteSessionConfirmModal.classList.remove('modal-active');
+      pendingDeleteSessionId = null;
+      renderResetDataScreen();
+    });
+
+    confirmDeleteSessionBtn.addEventListener('click', () => {
+      if (pendingDeleteSessionId !== null) {
+        sessionsList = sessionsList.filter(s => s.id !== pendingDeleteSessionId);
+        pendingDeleteSessionId = null;
+      }
+      deleteSessionConfirmModal.classList.remove('modal-active');
+      renderResetDataScreen();
+    });
 
     let currentEditingProductKey = null;
     const editSavedProductModal = document.getElementById('edit-saved-product-modal');
@@ -1771,6 +2249,20 @@
     const editSavedUInput = document.getElementById('edit-saved-u-input');
     const saveEditedSavedProductBtn = document.getElementById('save-edited-saved-product-btn');
     const deleteSavedProductBtn = document.getElementById('delete-saved-product-btn');
+
+    editSavedKInput.addEventListener('input', () => {
+      let val = editSavedKInput.value.replace(/[^0-9]/g, '');
+      if (val.length > 4) val = val.slice(0, 4);
+      editSavedKInput.value = val;
+    });
+
+    [editSavedBInput, editSavedZhInput, editSavedUInput].forEach(inp => {
+      inp.addEventListener('input', () => {
+        let val = inp.value.replace(/[^0-9]/g, '');
+        if (val.length > 3) val = val.slice(0, 3);
+        inp.value = val;
+      });
+    });
 
     closeEditSavedModalBtn.addEventListener('click', () => {
       editSavedProductModal.classList.remove('modal-active');
@@ -1808,9 +2300,14 @@
 
       if (keys.length === 0) {
         container.innerHTML = `
-          <div class="w-full h-44 rounded-2xl bg-cardBg flex flex-col items-center justify-center text-textWhite/40 border border-white/5">
-            <i class="bi bi-file-earmark-text text-3xl mb-2"></i>
-            <span class="font-onest text-sm">Дневник сохранений пуст</span>
+          <div class="flex flex-col items-center justify-center py-10 px-4 text-center select-none">
+            <div class="w-16 h-16 rounded-2xl bg-[#1E2632] flex items-center justify-center text-accentOrange mb-4 shadow-inner">
+              <span class="font-rubik font-bold text-[20px] leading-none">:(</span>
+            </div>
+            <span class="font-onest font-semibold text-[18px] text-textWhite mb-1.5">Тут пока пусто</span>
+            <p class="font-onest text-[13px] text-textWhite/50 leading-relaxed max-w-[280px]">
+              Добавляйте новые блюда вручную, и они автоматически сохранятся в вашем дневнике для быстрого выбора.
+            </p>
           </div>
         `;
         return;
@@ -1885,23 +2382,25 @@
     const savedSheetContent = document.getElementById('saved-sheet-content');
     const sheetDragHandle = document.getElementById('sheet-drag-handle');
 
-    navBtnAdd.addEventListener('click', () => {
-      const activeNormForDay = getUserNormForDate(selectedDate);
-      if (!activeNormForDay.isSet) {
-        switchTab('home');
-        const normBtn = document.getElementById('edit-norm-btn');
-        normBtn.classList.remove('shake-norm');
-        void normBtn.offsetWidth;
-        normBtn.classList.add('shake-norm');
-        setTimeout(() => normBtn.classList.remove('shake-norm'), 1000);
-        return;
-      }
+    let pendingOpenMealsCurtainAfterNorm = false;
 
+    function openMealsBuilderCurtain() {
       templatesStack.innerHTML = '';
       createTemplateRow();
       calculateCurtainTotals();
       mealsCurtain.classList.remove('hidden-curtain');
       mealsCurtain.classList.add('open-curtain');
+    }
+
+    navBtnAdd.addEventListener('click', () => {
+      const activeNormForDay = getUserNormForDate(selectedDate);
+      if (!activeNormForDay.isSet) {
+        switchTab('home');
+        pendingOpenMealsCurtainAfterNorm = true;
+        openNormModal();
+        return;
+      }
+      openMealsBuilderCurtain();
     });
 
     closeCurtainBtn.addEventListener('click', () => {
@@ -1909,7 +2408,8 @@
       mealsCurtain.classList.add('hidden-curtain');
     });
 
-    templatesDocBtn.addEventListener('click', () => {
+    templatesDocBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       renderSavedProductsSheetList();
       savedProductsSheet.classList.remove('sheet-hidden');
       savedProductsSheet.classList.add('sheet-open');
@@ -1920,7 +2420,10 @@
       savedProductsSheet.classList.add('sheet-hidden');
     }
 
-    closeSavedSheetBtn.addEventListener('click', closeSavedSheet);
+    closeSavedSheetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeSavedSheet();
+    });
 
     savedProductsSheet.addEventListener('click', (e) => {
       if (e.target === savedProductsSheet) closeSavedSheet();
@@ -1978,20 +2481,16 @@
 
       if (keys.length === 0) {
         savedProductsList.innerHTML = `
-          <div class="flex flex-col items-center justify-center py-10 px-4 text-center">
-            <div class="w-16 h-16 rounded-2xl bg-cardInput border border-white/5 flex items-center justify-center text-accentOrange mb-4 select-none shadow-inner">
+          <div class="flex flex-col items-center justify-center py-10 px-4 text-center select-none">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-accentOrange mb-4 select-none" style="background-color: #1E2632;">
               <span class="font-rubik font-bold text-[20px] leading-none">:(</span>
             </div>
             <span class="font-onest font-semibold text-[18px] text-textWhite mb-1.5">Тут пока пусто</span>
-            <p class="font-onest text-[13px] text-textWhite/50 leading-relaxed max-w-[280px] mb-6">
-              Добавляйте новые блюда вручную, и они автоматически сохранятся в вашем дневнике для быстрого выбора.
+            <p class="font-onest text-[13px] text-textWhite/50 leading-relaxed max-w-[280px]">
+              Добавляйте новые блюда вручную, для быстрого выбора.
             </p>
-            <button id="empty-sheet-ok-btn" class="w-full max-w-[200px] h-[44px] bg-cardInput rounded-full font-onest font-medium text-[14px] text-textWhite border border-white/10 active:scale-[0.98] transition-transform shadow-sm">
-              Хорошо
-            </button>
           </div>
         `;
-        document.getElementById('empty-sheet-ok-btn').addEventListener('click', closeSavedSheet);
         return;
       }
 
@@ -2029,7 +2528,8 @@
           </div>
         `;
 
-        itemCard.addEventListener('click', () => {
+        itemCard.addEventListener('click', (e) => {
+          e.stopPropagation();
           createTemplateRow({
             name: prod.name,
             weight: '',
@@ -2078,17 +2578,17 @@
           </div>
           <div class="flex flex-col flex-1">
             <span class="font-onest font-normal text-[12px] text-textWhite/20 mb-1">Вес</span>
-            <input type="text" inputmode="decimal" value="${defWeight}" placeholder="гр/мл" class="item-weight-input w-full h-[50px] bg-[#1E2631] rounded-[14px] px-3 text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/30 focus:outline-none" />
+            <input type="text" inputmode="decimal" maxlength="5" value="${defWeight}" placeholder="гр/мл" class="item-weight-input w-full h-[50px] bg-[#1E2631] rounded-[14px] px-3 text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/30 focus:outline-none cursor-pointer" />
           </div>
         </div>
 
         <div class="mt-[24px] flex flex-col w-full">
           <span class="font-onest font-normal text-[12px] text-textWhite/20 mb-2">КБЖУ на 100 гр/мл</span>
           <div class="grid grid-cols-4 gap-[6px] w-full">
-            <input type="text" inputmode="decimal" value="${defK100}" placeholder="0" class="kbju-k-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
-            <input type="text" inputmode="decimal" value="${defB100}" placeholder="0" class="kbju-b-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
-            <input type="text" inputmode="decimal" value="${defZh100}" placeholder="0" class="kbju-zh-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
-            <input type="text" inputmode="decimal" value="${defU100}" placeholder="0" class="kbju-u-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none" />
+            <input type="text" inputmode="decimal" maxlength="4" value="${defK100}" placeholder="0" class="kbju-k-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none cursor-pointer" />
+            <input type="text" inputmode="decimal" maxlength="3" value="${defB100}" placeholder="0" class="kbju-b-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none cursor-pointer" />
+            <input type="text" inputmode="decimal" maxlength="3" value="${defZh100}" placeholder="0" class="kbju-zh-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none cursor-pointer" />
+            <input type="text" inputmode="decimal" maxlength="3" value="${defU100}" placeholder="0" class="kbju-u-input h-[50px] bg-[#1E2632] rounded-[14px] text-center font-onest font-medium text-[14px] text-textWhite placeholder:text-textWhite/20 focus:outline-none cursor-pointer" />
           </div>
 
           <div class="grid grid-cols-4 gap-[6px] w-full mt-[10px]">
@@ -2118,12 +2618,19 @@
       const zhInp = row.querySelector('.kbju-zh-input');
       const uInp = row.querySelector('.kbju-u-input');
 
-      function sanitizeKbjuInput(inp) {
+      [weightInp, kInp, bInp, zhInp, uInp].forEach(inp => {
+        inp.style.cursor = 'pointer';
+        inp.addEventListener('click', (e) => {
+          e.stopPropagation();
+          inp.focus();
+        });
+      });
+
+      function sanitizeKbjuInput(inp, maxDigits = 4) {
         inp.addEventListener('input', () => {
-          let val = inp.value.replace(',', '.').replace(/[^0-9.]/g, '');
-          const parts = val.split('.');
-          if (parts[0].length > 3) parts[0] = parts[0].slice(0, 3);
-          inp.value = parts.join('.');
+          let val = inp.value.replace(/[^0-9]/g, '');
+          if (val.length > maxDigits) val = val.slice(0, maxDigits);
+          inp.value = val;
           recalcRowValues(row);
           calculateCurtainTotals();
         });
@@ -2138,10 +2645,10 @@
         calculateCurtainTotals();
       });
 
-      sanitizeKbjuInput(kInp);
-      sanitizeKbjuInput(bInp);
-      sanitizeKbjuInput(zhInp);
-      sanitizeKbjuInput(uInp);
+      sanitizeKbjuInput(kInp, 4);
+      sanitizeKbjuInput(bInp, 3);
+      sanitizeKbjuInput(zhInp, 3);
+      sanitizeKbjuInput(uInp, 3);
 
       templatesStack.appendChild(row);
       if (prefillData) recalcRowValues(row);
@@ -2171,7 +2678,7 @@
         plusIconHolder.innerHTML = `<svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
         templatesLimitMsg.classList.remove('active');
         templatesStack.style.transform = 'translateY(0px)';
-      }, 2000);
+      }, 500);
     }
 
     addTemplateRowBtn.addEventListener('click', () => createTemplateRow());
@@ -2209,7 +2716,8 @@
       document.getElementById('curtain-total-u').textContent = String(Math.round(sumU * 10) / 10).replace('.', ',');
     }
 
-    curtainSaveAllBtn.addEventListener('click', () => {
+    curtainSaveAllBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const items = [];
       let totalK = 0, totalB = 0, totalZh = 0, totalU = 0;
       let hasValidationErrors = false;
@@ -2288,6 +2796,8 @@
       }
 
       const dayData = getDayMetrics(selectedDate);
+      const isFirstMealToday = (dayData.meals.length === 0);
+
       dayData.calories += Math.round(totalK);
       dayData.protein += Math.round(totalB);
       dayData.fat += Math.round(totalZh);
@@ -2305,6 +2815,18 @@
       mealsCurtain.classList.add('hidden-curtain');
       switchTab('home');
       updateMetrics();
+
+      if (isFirstMealToday) {
+        setTimeout(() => {
+          const homeView = document.getElementById('home-scroll-area');
+          const listContainer = document.getElementById('meals-accordion-list');
+          if (homeView && listContainer && listContainer.firstElementChild) {
+            const firstMealEl = listContainer.firstElementChild;
+            const topPos = firstMealEl.offsetTop - 120;
+            homeView.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+          }
+        }, 300);
+      }
     });
 
     const stylingThemeSwitch = document.getElementById('styling-theme-switch');
@@ -2398,7 +2920,7 @@
       document.getElementById('norm-box-u')
     ];
 
-    editNormBtn.addEventListener('click', () => {
+    function openNormModal() {
       const activeNorm = getUserNormForDate(selectedDate);
       inputs[0].value = activeNorm.isSet ? activeNorm.calories : '';
       inputs[1].value = activeNorm.isSet ? activeNorm.protein : '';
@@ -2407,9 +2929,17 @@
       inputs.forEach((inp, idx) => placeholders[idx].classList.toggle('hidden', inp.value.length > 0));
       normModal.classList.add('modal-active');
       inputs[0].focus();
+    }
+
+    editNormBtn.addEventListener('click', () => {
+      pendingOpenMealsCurtainAfterNorm = false;
+      openNormModal();
     });
 
-    closeNormModalBtn.addEventListener('click', () => normModal.classList.remove('modal-active'));
+    closeNormModalBtn.addEventListener('click', () => {
+      pendingOpenMealsCurtainAfterNorm = false;
+      normModal.classList.remove('modal-active');
+    });
 
     inputs.forEach((input, index) => {
       const maxLen = (index === 0) ? 4 : 3;
@@ -2422,6 +2952,7 @@
         if (index === 0 && input.value.length >= 4) inputs[1].focus();
         else if (index > 0 && index < 3 && input.value.length >= 3) inputs[index + 1].focus();
       });
+      input.index = index;
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && input.value.length === 0 && index > 0) inputs[index - 1].focus();
       });
@@ -2465,6 +2996,13 @@
       document.getElementById('norm-text-preview').textContent = `${valK}/${valB}/${valZh}/${valU}`;
       normModal.classList.remove('modal-active');
       updateMetrics();
+
+      if (pendingOpenMealsCurtainAfterNorm) {
+        pendingOpenMealsCurtainAfterNorm = false;
+        setTimeout(() => {
+          openMealsBuilderCurtain();
+        }, 150);
+      }
     });
 
     const editProfileBtn = document.getElementById('edit-profile-btn');
@@ -2484,21 +3022,72 @@
     const photoCropPreviewContainer = document.getElementById('photo-crop-preview-container');
     const cropImagePreview = document.getElementById('crop-image-preview');
     const photoScaleRange = document.getElementById('photo-scale-range');
-    let tempAvatarSrc = null;
+    
+    let currentAvatarSrc = "https://emojigraph.org/media/144/apple/octopus_1f419.png";
+    let isCurrentCustomPhoto = false;
+    let savedCropConfig = { scale: 1, x: 0, y: 0 };
+
+    let tempAvatarSrc = currentAvatarSrc;
+    let isTempCustomPhoto = false;
     let photoOffsetX = 0;
     let photoOffsetY = 0;
     let isPhotoDragging = false;
     let photoStartX = 0;
     let photoStartY = 0;
 
+    const presetAvatarsList = document.querySelectorAll('.avatar-preset-item');
+
+    function applyRingToPreset(targetSrc) {
+      presetAvatarsList.forEach(item => {
+        if (item.dataset.src === targetSrc) {
+          item.classList.add('ring-2', 'ring-accentGreen');
+        } else {
+          item.classList.remove('ring-2', 'ring-accentGreen');
+        }
+      });
+    }
+
+    presetAvatarsList.forEach(item => {
+      item.addEventListener('click', () => {
+        tempAvatarSrc = item.dataset.src;
+        isTempCustomPhoto = false;
+        photoCropPreviewContainer.classList.add('hidden');
+        applyRingToPreset(tempAvatarSrc);
+        triggerUploadBtn.innerHTML = `<i class="bi bi-image text-lg"></i> <span>Выбрать из галереи</span>`;
+      });
+    });
+
     editProfileBtn.addEventListener('click', () => {
       editProfileNameInput.value = profileUserName.textContent.trim();
-      tempAvatarSrc = null;
-      photoCropPreviewContainer.classList.add('hidden');
+      tempAvatarSrc = currentAvatarSrc;
+      isTempCustomPhoto = isCurrentCustomPhoto;
+
+      if (!isCurrentCustomPhoto) {
+        applyRingToPreset(currentAvatarSrc);
+        photoCropPreviewContainer.classList.add('hidden');
+        triggerUploadBtn.innerHTML = `<i class="bi bi-image text-lg"></i> <span>Выбрать из галереи</span>`;
+      } else {
+        presetAvatarsList.forEach(item => item.classList.remove('ring-2', 'ring-accentGreen'));
+        cropImagePreview.src = currentAvatarSrc;
+        photoScaleRange.value = savedCropConfig.scale;
+        cropImagePreview.style.transform = `scale(${savedCropConfig.scale})`;
+        photoOffsetX = savedCropConfig.x;
+        photoOffsetY = savedCropConfig.y;
+        cropImagePreview.style.left = `${photoOffsetX}px`;
+        cropImagePreview.style.top = `${photoOffsetY}px`;
+        photoCropPreviewContainer.classList.remove('hidden');
+        triggerUploadBtn.innerHTML = `<i class="bi bi-check-circle-fill text-accentGreen text-lg"></i> <span>Фото загружено</span>`;
+      }
       profileModal.classList.add('modal-active');
     });
 
-    closeProfileModalBtn.addEventListener('click', () => profileModal.classList.remove('modal-active'));
+    closeProfileModalBtn.addEventListener('click', () => {
+      tempAvatarSrc = currentAvatarSrc;
+      isTempCustomPhoto = isCurrentCustomPhoto;
+      applyRingToPreset(currentAvatarSrc);
+      profileModal.classList.remove('modal-active');
+    });
+
     triggerUploadBtn.addEventListener('click', () => profileFileInput.click());
 
     profileFileInput.addEventListener('change', (e) => {
@@ -2507,6 +3096,7 @@
         const reader = new FileReader();
         reader.onload = (event) => {
           tempAvatarSrc = event.target.result;
+          isTempCustomPhoto = true;
           cropImagePreview.src = tempAvatarSrc;
           photoScaleRange.value = 1;
           cropImagePreview.style.transform = 'scale(1)';
@@ -2514,8 +3104,10 @@
           photoOffsetY = 0;
           cropImagePreview.style.left = '0px';
           cropImagePreview.style.top = '0px';
+          
+          presetAvatarsList.forEach(item => item.classList.remove('ring-2', 'ring-accentGreen'));
           photoCropPreviewContainer.classList.remove('hidden');
-          triggerUploadBtn.innerHTML = `<i class="bi bi-check-circle-fill text-accentGreen"></i> <span>Фото загружено</span>`;
+          triggerUploadBtn.innerHTML = `<i class="bi bi-check-circle-fill text-accentGreen text-lg"></i> <span>Фото загружено</span>`;
         };
         reader.readAsDataURL(file);
       }
@@ -2552,8 +3144,8 @@
 
     window.addEventListener('touchmove', (e) => {
       if (!isPhotoDragging) return;
-      photoOffsetX = e.touches[0].clientX - photoStartX;
-      photoOffsetY = e.touches[0].clientY - photoStartY;
+      photoOffsetX = e.touches[0].clientX - photoOffsetX;
+      photoOffsetY = e.touches[0].clientY - photoOffsetY;
       cropImagePreview.style.left = `${photoOffsetX}px`;
       cropImagePreview.style.top = `${photoOffsetY}px`;
     }, {passive: true});
@@ -2569,38 +3161,704 @@
         settingsUserName.textContent = newName;
         accountPageName.textContent = newName;
       }
-      if (tempAvatarSrc) {
-        profileAvatarImg.src = tempAvatarSrc;
-        settingsAvatarImg.src = tempAvatarSrc;
-        accountPageAvatar.src = tempAvatarSrc;
-        const scaleVal = photoScaleRange.value;
-        [profileAvatarImg, settingsAvatarImg, accountPageAvatar].forEach(img => {
+
+      currentAvatarSrc = tempAvatarSrc;
+      isCurrentCustomPhoto = isTempCustomPhoto;
+
+      if (isCurrentCustomPhoto && !photoCropPreviewContainer.classList.contains('hidden')) {
+        savedCropConfig.scale = parseFloat(photoScaleRange.value);
+        savedCropConfig.x = photoOffsetX;
+        savedCropConfig.y = photoOffsetY;
+      }
+
+      const avatarContainers = [
+        { el: profileAvatarImg, parentW: 140 },
+        { el: settingsAvatarImg, parentW: 53 },
+        { el: accountPageAvatar, parentW: 100 }
+      ];
+
+      avatarContainers.forEach(item => {
+        const img = item.el;
+        img.src = currentAvatarSrc;
+        if (isCurrentCustomPhoto) {
           img.style.objectFit = 'cover';
           img.style.width = '100%';
           img.style.height = '100%';
-          img.style.transform = `scale(${scaleVal}) translate(${photoOffsetX}px, ${photoOffsetY}px)`;
-        });
-      }
+          const ratio = item.parentW / 96; 
+          img.style.transform = `scale(${savedCropConfig.scale}) translate(${savedCropConfig.x * ratio}px, ${savedCropConfig.y * ratio}px)`;
+        } else {
+          img.style.objectFit = 'contain';
+          const size = item.parentW === 140 ? '85px' : (item.parentW === 100 ? '60px' : '32px');
+          img.style.width = size;
+          img.style.height = size;
+          img.style.transform = 'none';
+        }
+      });
+
       profileModal.classList.remove('modal-active');
-      triggerUploadBtn.innerHTML = `<i class="bi bi-image"></i> <span>Выбрать из галереи</span>`;
+      triggerUploadBtn.innerHTML = `<i class="bi bi-image text-lg"></i> <span>Выбрать из галереи</span>`;
       photoCropPreviewContainer.classList.add('hidden');
     });
 
-    const activeWidgets = { weight: false, steps: false, activity: false, strength: false, notes: false };
-    const widgetMeta = {
-      weight: { title: 'Вес', value: '72.4 кг', sub: 'Цель: 70.0 кг', icon: '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path><path d="M9 3h6"></path>' },
-      steps: { title: 'Шаги', value: '8 420', sub: 'Цель: 10 000', icon: '<circle cx="12" cy="5" r="2"></circle><path d="M10 22l2-7 3 3v4"></path><path d="M14 13l2-3-4-2-3 4 2 3"></path>' },
-      activity: { title: 'Активность', value: '42 мин', sub: 'Кардио и разминка', icon: '<circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5l3.5-7 3 2.5"></path><path d="M5.5 17.5l4-7 4.5 1"></path>' },
-      strength: { title: 'Прогресс силовых', value: '95 кг', sub: 'Жим лежа +2.5 кг', icon: '<path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"></path>' },
-      notes: { title: 'Заметки', value: 'Водный баланс', sub: 'Выпито 1.8 л из 2.2 л', icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>' }
-    };
+    /* ========================================================
+       ИНТЕРАКТИВНЫЕ ВИДЖЕТЫ: ВЕС, ВОДА, ШАГИ С ПРИВЯЗКОЙ К ДАТЕ
+       ======================================================== */
+    const MAX_WATER_CANS = 40;
+
+    const dailyWidgetsDataStore = {};
+
+    function getDayWidgetsState(dateObj) {
+      const key = getDateKey(dateObj);
+      if (!dailyWidgetsDataStore[key]) {
+        dailyWidgetsDataStore[key] = {
+          weight: '0',
+          weightSaved: true,
+          steps: '0',
+          stepsSaved: true,
+          waterCount: 0,
+          shortWindowStart: 1,
+          wideWindowStart: 1
+        };
+      }
+      return dailyWidgetsDataStore[key];
+    }
+
+    const historicalWidgetsConfigStore = {};
+    historicalWidgetsConfigStore['1970-01-01'] = { weight: false, water: false, steps: false };
+
+    function getWidgetsConfigForDate(dateObj) {
+      const targetTime = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+      const sortedKeys = Object.keys(historicalWidgetsConfigStore).sort();
+      let activeCfg = { weight: false, water: false, steps: false };
+
+      for (const k of sortedKeys) {
+        const parts = k.split('-');
+        const cfgTime = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])).getTime();
+        if (cfgTime <= targetTime) {
+          activeCfg = { ...historicalWidgetsConfigStore[k] };
+        } else {
+          break;
+        }
+      }
+      return activeCfg;
+    }
+
+    function syncWidgetsSwitchUI() {
+      const currentConfig = getWidgetsConfigForDate(selectedDate);
+      document.querySelectorAll('.widget-toggle-btn').forEach(btn => {
+        const key = btn.dataset.widgetKey;
+        if (currentConfig[key]) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    const checkmarkSVG = `
+      <svg style="width: 16px; height: 16px; stroke: #050F1B; fill: none; margin: auto;" viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>`;
+
+    const iconWeightSVG = `
+      <svg style="width: 20px; height: 20px; stroke: rgba(240, 240, 240, 0.55); fill: none;" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="4" />
+        <path d="M8 8h8v3H8z" />
+        <circle cx="12" cy="16" r="1.5" />
+      </svg>`;
+
+    const iconWaterSVG = `
+      <svg style="width: 20px; height: 20px; stroke: rgba(240, 240, 240, 0.55); fill: none;" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+      </svg>`;
+
+    const iconStepsSVG = `
+      <svg style="width: 20px; height: 20px; stroke: rgba(240, 240, 240, 0.55); fill: none;" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 16v-2.38C4 11.5 5.5 9 8 9h1c1.5 0 3 1.5 3 3.5V16a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3Z"/>
+        <path d="M12 11V8.62C12 6.5 13.5 4 16 4h1c1.5 0 3 1.5 3 3.5V11a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3Z"/>
+      </svg>`;
+
+    function getWidgetInputWidth(val, fontMultiplier) {
+      const len = String(val).length || 1;
+      return Math.max(20, len * fontMultiplier + 4) + 'px';
+    }
+
+    function getWaterWindow(isWide) {
+      const wState = getDayWidgetsState(selectedDate);
+      const slotsPerView = isWide ? 5 : 3;
+
+      let start = isWide ? (wState.wideWindowStart || 1) : (wState.shortWindowStart || 1);
+
+      if (wState.waterCount === 0) {
+        start = 1;
+      }
+
+      if (isWide) wState.wideWindowStart = start;
+      else wState.shortWindowStart = start;
+
+      const cans = [];
+      for (let i = 0; i < slotsPerView; i++) {
+        const canNum = start + i;
+        if (canNum <= MAX_WATER_CANS) {
+          cans.push(canNum);
+        }
+      }
+      return cans;
+    }
+
+    function buildWidgetCansHTML(isWide, isEnteringFromLeft = false) {
+      const wState = getDayWidgetsState(selectedDate);
+      const visibleCans = getWaterWindow(isWide);
+      const height = isWide ? '78px' : '82px';
+      const cellClass = isWide ? 'water-can-cell-wide' : 'water-can-cell-short';
+      let html = '';
+
+      visibleCans.forEach((canIndex) => {
+        const isFilled = canIndex <= wState.waterCount;
+        const isNextEmptyTarget = (canIndex === wState.waterCount + 1);
+        const animClass = isEnteringFromLeft ? 'can-enter-left' : '';
+
+        html += `
+          <div data-can="${canIndex}" class="${cellClass} tap-press ${animClass}" style="flex: 1 1 0; min-width: 0; height: ${height}; position: relative; background: #313843; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; box-sizing: border-box; ${isNextEmptyTarget ? 'outline: 1.5px dashed rgba(255,255,255,0.25); outline-offset: -1px;' : ''}">
+            <div class="water-bar" style="position: absolute; inset: 0; width: 100%; height: 100%; clip-path: inset(${isFilled ? '0 0 0 0' : '100% 0 0 0'}); background: #94FD17; pointer-events: none;"></div>
+            <div class="water-num" style="position: relative; z-index: 2; color: ${isFilled ? '#050F1B' : '#F0F0F0'}; font-size: 16px; font-family: Onest; font-weight: 600; line-height: 1; transition: color 0.3s;">${canIndex}</div>
+            ${!isFilled ? `<div class="water-sub" style="position: absolute; bottom: 8px; left: 0; right: 0; z-index: 2; text-align: center; color: rgba(240, 240, 240, 0.35); font-size: 9px; font-family: Onest; font-weight: 500; line-height: 1;">0.5</div>` : ''}
+          </div>
+        `;
+      });
+      return html;
+    }
+
+    function buildCompactWidgetCard(type) {
+      const wState = getDayWidgetsState(selectedDate);
+
+      if (type === 'weight') {
+        const inputW = getWidgetInputWidth(wState.weight, 11);
+        return `
+          <div style="flex: 1 1 calc(50% - 8px); min-width: 0; height: 190px; padding: 16px; background: #1E2632; border-radius: 26px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-sizing: border-box;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #343B46; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">${iconWeightSVG}</div>
+                <span style="color: #F0F0F0; font-size: 19px; font-weight: 600; line-height: 28px;">Вес</span>
+              </div>
+            </div>
+            
+            <div class="tap-press-subtle slot-weight" style="width: 100%; height: 56px; padding: 0 10px 0 16px; background: #313843; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; cursor: text; box-sizing: border-box;">
+              <div style="display: flex; align-items: baseline; gap: 8px; overflow: hidden;">
+                <input id="inputWeightShort" type="text" inputmode="decimal" pattern="[0-9]*" maxlength="5" value="${wState.weight}" class="widget-field-input" style="width: ${inputW}; font-size: 19px; font-family: Rubik; font-weight: 500; line-height: 1;" />
+                <span id="labelWeightShort" style="color: rgba(240.04, 240.04, 240.04, 0.40); font-size: 13px; font-family: Rubik; line-height: 1; flex-shrink: 0;">кг</span>
+              </div>
+              <button id="btnSaveWeightShort" class="tap-press btn-pop-in" style="display: ${wState.weightSaved ? 'none' : 'flex'}; width: 34px; height: 34px; background: #94FD17; border-radius: 9999px; align-items: center; justify-content: center; border: none; flex-shrink: 0;">
+                <span class="btn-text" style="color: #050F1B; font-size: 11px; font-weight: 700; font-family: Onest; text-transform: uppercase;">ок</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === 'water') {
+        const liters = (wState.waterCount * 0.5).toFixed(1).replace('.0', '') + ' л';
+        return `
+          <div style="flex: 1 1 calc(50% - 8px); min-width: 0; width: 100%; max-width: calc(50% - 8px); height: 190px; padding: 16px; background: #1E2632; border-radius: 26px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #343B46; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">${iconWaterSVG}</div>
+                <span style="color: #F0F0F0; font-size: 19px; font-weight: 600; line-height: 28px;">Вода</span>
+              </div>
+              <span id="labelWaterShort" style="color: rgba(240, 240, 240, 0.35); font-size: 17px; font-weight: 600; flex-shrink: 0;">${liters}</span>
+            </div>
+            <div style="width: 100%; min-width: 0; overflow: hidden;">
+              <div id="trackWaterShort" class="track-no-scroll" style="width: 100%; display: flex; justify-content: space-between; gap: 8px; overflow: hidden !important; touch-action: none;">
+                ${buildWidgetCansHTML(false)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === 'steps') {
+        const inputW = getWidgetInputWidth(wState.steps, 11);
+        return `
+          <div style="flex: 1 1 calc(50% - 8px); min-width: 0; height: 190px; padding: 16px; background: #1E2632; border-radius: 26px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-sizing: border-box;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #343B46; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">${iconStepsSVG}</div>
+                <span style="color: #F0F0F0; font-size: 19px; font-weight: 600; line-height: 28px;">Шаги</span>
+              </div>
+            </div>
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 6px;">
+              <div style="width: 100%; display: flex; justify-content: flex-start; text-align: left;">
+                <span style="color: #94FD17; font-size: 11px; font-weight: 500;">из Apple Health</span>
+              </div>
+              <div class="tap-press-subtle slot-steps" style="width: 100%; height: 56px; padding: 0 10px 0 14px; background: #313843; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; cursor: text; box-sizing: border-box;">
+                <div style="display: flex; align-items: baseline; gap: 6px; overflow: visible; flex-shrink: 0;">
+                  <input id="inputStepsShort" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" value="${wState.steps}" class="widget-field-input" style="width: ${inputW}; font-size: 19px; font-family: Rubik; font-weight: 500; line-height: 1; flex-shrink: 0;" />
+                  <span id="labelStepsShort" style="color: rgba(240.04, 240.04, 240.04, 0.40); font-size: 13px; font-family: Rubik; line-height: 1; flex-shrink: 0; white-space: nowrap;">шаг</span>
+                </div>
+                <button id="btnSaveStepsShort" class="tap-press btn-pop-in" style="display: ${wState.stepsSaved ? 'none' : 'flex'}; width: 34px; height: 34px; background: #94FD17; border-radius: 9999px; align-items: center; justify-content: center; border: none; flex-shrink: 0; margin-left: 2px;">
+                  <span class="btn-text" style="color: #050F1B; font-size: 11px; font-weight: 700; font-family: Onest; text-transform: uppercase;">ок</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function buildWideWidgetCard(type) {
+      const wState = getDayWidgetsState(selectedDate);
+
+      if (type === 'weight') {
+        const inputW = getWidgetInputWidth(wState.weight, 13);
+        const isSaved = wState.weightSaved;
+        return `
+          <div style="width: 100%; height: 150px; padding: 18px 20px; background: #1E2632; border-radius: 26px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-sizing: border-box;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #343B46; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">${iconWeightSVG}</div>
+                <span style="color: #F0F0F0; font-size: 19px; font-weight: 600; line-height: 28px;">Вес</span>
+              </div>
+            </div>
+            
+            <div style="width: 100%; display: flex; align-items: center; position: relative;">
+              <div class="tap-press-subtle slot-weight" style="flex: 1; min-width: 0; height: 56px; padding: 0 16px 0 20px; background: #313843; border-radius: 16px; display: flex; align-items: center; cursor: text; box-sizing: border-box;">
+                <div style="display: flex; align-items: baseline; gap: 8px; overflow: hidden;">
+                  <input id="inputWeightWide" type="text" inputmode="decimal" pattern="[0-9]*" maxlength="5" value="${wState.weight}" class="widget-field-input" style="width: ${inputW}; font-size: 21px; font-family: Rubik; font-weight: 500; line-height: 1;" />
+                  <span id="labelWeightWide" style="color: rgba(240.04, 240.04, 240.04, 0.40); font-size: 14px; font-family: Rubik; line-height: 1; flex-shrink: 0;">кг</span>
+                </div>
+              </div>
+              <button id="btnSaveWeightWide" class="tap-press wide-save-btn" style="max-width: ${isSaved ? '0px' : '150px'}; opacity: ${isSaved ? '0' : '1'}; margin-left: ${isSaved ? '0px' : '12px'}; padding: ${isSaved ? '0' : '0 24px'}; pointer-events: ${isSaved ? 'none' : 'auto'}; height: 48px; min-width: ${isSaved ? '0px' : '110px'}; background: #94FD17; border-radius: 9999px; display: flex; justify-content: center; align-items: center; border: none; flex-shrink: 0; white-space: nowrap;">
+                <span class="btn-text" style="color: #050F1B; font-size: 13px; font-weight: 600;">Сохранить</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === 'water') {
+        const liters = (wState.waterCount * 0.5).toFixed(1).replace('.0', '') + ' л';
+        return `
+          <div style="width: 100%; height: 171px; padding: 18px 20px; background: #1E2632; border-radius: 26px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
+            <div style="width: 100%; height: 44px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #343B46; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">${iconWaterSVG}</div>
+                <span style="color: #F0F0F0; font-size: 19px; font-weight: 600; line-height: 28px;">Вода</span>
+              </div>
+              <span id="labelWaterWide" style="color: rgba(240, 240, 240, 0.35); font-size: 17px; font-weight: 600; flex-shrink: 0;">${liters}</span>
+            </div>
+            <div style="width: 100%; min-width: 0; overflow: hidden; margin-top: 5px;">
+              <div id="trackWaterWide" class="track-no-scroll" style="width: 100%; display: flex; justify-content: space-between; gap: 8px; overflow: hidden !important; touch-action: none;">
+                ${buildWidgetCansHTML(true)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === 'steps') {
+        const inputW = getWidgetInputWidth(wState.steps, 13);
+        const isSaved = wState.stepsSaved;
+        return `
+          <div style="width: 100%; height: 150px; padding: 18px 20px; background: #1E2632; border-radius: 26px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-sizing: border-box;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #343B46; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">${iconStepsSVG}</div>
+                <span style="color: #F0F0F0; font-size: 19px; font-weight: 600; line-height: 28px;">Шаги</span>
+              </div>
+              <span style="color: #94FD17; font-size: 12px; font-weight: 500;">из Apple Health</span>
+            </div>
+            
+            <div style="width: 100%; display: flex; align-items: center; position: relative;">
+              <div class="tap-press-subtle slot-steps" style="flex: 1; min-width: 0; height: 56px; padding: 0 16px 0 20px; background: #313843; border-radius: 16px; display: flex; align-items: center; cursor: text; box-sizing: border-box;">
+                <div style="display: flex; align-items: baseline; gap: 8px; overflow: hidden;">
+                  <input id="inputStepsWide" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" value="${wState.steps}" class="widget-field-input" style="width: ${inputW}; font-size: 21px; font-family: Rubik; font-weight: 500; line-height: 1;" />
+                  <span id="labelStepsWide" style="color: rgba(240.04, 240.04, 240.04, 0.40); font-size: 14px; font-family: Rubik; line-height: 1; flex-shrink: 0;">шаг</span>
+                </div>
+              </div>
+              <button id="btnSaveStepsWide" class="tap-press wide-save-btn" style="max-width: ${isSaved ? '0px' : '150px'}; opacity: ${isSaved ? '0' : '1'}; margin-left: ${isSaved ? '0px' : '12px'}; padding: ${isSaved ? '0' : '0 24px'}; pointer-events: ${isSaved ? 'none' : 'auto'}; height: 48px; min-width: ${isSaved ? '0px' : '110px'}; background: #94FD17; border-radius: 9999px; display: flex; justify-content: center; align-items: center; border: none; flex-shrink: 0; white-space: nowrap;">
+                <span class="btn-text" style="color: #050F1B; font-size: 13px; font-weight: 600;">Сохранить</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    let isWaterAnimating = false;
+
+    function updateWaterLitersDisplay(count) {
+      const liters = (count * 0.5).toFixed(1).replace('.0', '') + ' л';
+      const ls = document.getElementById('labelWaterShort');
+      const lw = document.getElementById('labelWaterWide');
+      if (ls) ls.innerText = liters;
+      if (lw) lw.innerText = liters;
+    }
+
+    function onWaterCanTapScoped(clickedIndex, isWide) {
+      if (isWaterAnimating || clickedIndex > MAX_WATER_CANS) return;
+      const wState = getDayWidgetsState(selectedDate);
+      const trackId = isWide ? 'trackWaterWide' : 'trackWaterShort';
+      const track = document.getElementById(trackId);
+      if (!track) return;
+
+      const isFilled = clickedIndex <= wState.waterCount;
+
+      if (isFilled) {
+        isWaterAnimating = true;
+        const targetLastFilled = wState.waterCount;
+        const cell = track.querySelector(`[data-can="${targetLastFilled}"]`);
+
+        const newCount = Math.max(0, wState.waterCount - 1);
+        updateWaterLitersDisplay(newCount);
+
+        if (cell) {
+          const bar = cell.querySelector('.water-bar');
+          const num = cell.querySelector('.water-num');
+          if (bar) bar.className = 'water-bar anim-water-drain';
+          if (num) num.style.color = '#F0F0F0';
+        }
+
+        setTimeout(() => {
+          wState.waterCount = newCount;
+
+          let shiftOccurred = false;
+          if (!isWide) {
+            if (wState.shortWindowStart && targetLastFilled === wState.shortWindowStart && wState.shortWindowStart > 1) {
+              wState.shortWindowStart = Math.max(1, wState.shortWindowStart - 2);
+              shiftOccurred = true;
+            }
+          } else {
+            if (wState.wideWindowStart && targetLastFilled === wState.wideWindowStart && wState.wideWindowStart > 1) {
+              wState.wideWindowStart = Math.max(1, wState.wideWindowStart - 4);
+              shiftOccurred = true;
+            }
+          }
+
+          if (shiftOccurred) {
+            track.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
+            track.style.transform = isWide ? 'translateX(50px)' : 'translateX(40px)';
+
+            setTimeout(() => {
+              track.style.transition = 'none';
+              track.style.transform = 'translateX(0px)';
+              renderScopedWaterView(isWide, true);
+              isWaterAnimating = false;
+            }, 260);
+          } else {
+            renderScopedWaterView(isWide, false);
+            isWaterAnimating = false;
+          }
+        }, 250);
+
+      } else {
+        if (wState.waterCount >= MAX_WATER_CANS) return;
+        isWaterAnimating = true;
+
+        const nextCanNum = wState.waterCount + 1;
+        updateWaterLitersDisplay(nextCanNum);
+
+        const curWindow = getWaterWindow(isWide);
+        const isRightEdge = curWindow.length > 0 && curWindow[curWindow.length - 1] === nextCanNum;
+
+        const cell = track.querySelector(`[data-can="${nextCanNum}"]`);
+        if (cell) {
+          const bar = cell.querySelector('.water-bar');
+          const num = cell.querySelector('.water-num');
+          if (bar) bar.className = 'water-bar anim-water-fill';
+          if (num) num.style.color = '#050F1B';
+        }
+
+        setTimeout(() => {
+          wState.waterCount = nextCanNum;
+
+          if (isRightEdge && nextCanNum < MAX_WATER_CANS) {
+            if (!isWide) {
+              wState.shortWindowStart = Math.max(1, nextCanNum - 2 + 1);
+            } else {
+              wState.wideWindowStart = Math.max(1, nextCanNum - 4 + 1);
+            }
+
+            const step = cell ? cell.offsetWidth + 8 : (isWide ? 60 : 45);
+            track.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
+            track.style.transform = `translateX(-${step}px)`;
+
+            setTimeout(() => {
+              track.style.transition = 'none';
+              track.style.transform = 'translateX(0px)';
+              renderScopedWaterView(isWide, false);
+              isWaterAnimating = false;
+            }, 260);
+
+          } else {
+            renderScopedWaterView(isWide, false);
+            isWaterAnimating = false;
+          }
+        }, 250);
+      }
+    }
+
+    function renderScopedWaterView(isWide, isEnteringFromLeft = false) {
+      const wState = getDayWidgetsState(selectedDate);
+      updateWaterLitersDisplay(wState.waterCount);
+      const trackId = isWide ? 'trackWaterWide' : 'trackWaterShort';
+      const track = document.getElementById(trackId);
+      if (track) {
+        track.innerHTML = buildWidgetCansHTML(isWide, isEnteringFromLeft);
+      }
+      bindScopedWaterListeners(isWide);
+    }
+
+    function bindScopedWaterListeners(isWide) {
+      const cellClass = isWide ? '.water-can-cell-wide' : '.water-can-cell-short';
+      document.querySelectorAll(cellClass).forEach(cell => {
+        cell.onclick = (e) => {
+          e.stopPropagation();
+          const idx = parseInt(cell.getAttribute('data-can'), 10);
+          onWaterCanTapScoped(idx, isWide);
+        };
+      });
+    }
+
+    function triggerSaveButtonAnim(btn, onComplete) {
+      if (btn.dataset.animating === 'true') return;
+      btn.dataset.animating = 'true';
+
+      const isWideBtn = btn.classList.contains('wide-save-btn');
+
+      if (isWideBtn) {
+        btn.style.minWidth = '48px';
+        btn.style.width = '48px';
+        btn.style.padding = '0';
+        btn.innerHTML = checkmarkSVG;
+        btn.classList.add('save-pulse');
+
+        setTimeout(() => {
+          btn.classList.remove('save-pulse');
+          btn.style.opacity = '0';
+          btn.style.maxWidth = '0px';
+          btn.style.minWidth = '0px';
+          btn.style.width = '0px';
+          btn.style.marginLeft = '0px';
+          btn.style.pointerEvents = 'none';
+
+          setTimeout(() => {
+            btn.dataset.animating = 'false';
+            if (onComplete) onComplete();
+          }, 450);
+        }, 850);
+
+      } else {
+        btn.classList.remove('btn-pop-in');
+        btn.classList.add('save-pulse');
+        btn.innerHTML = checkmarkSVG;
+
+        setTimeout(() => {
+          btn.classList.remove('save-pulse');
+          btn.classList.add('btn-pop-out');
+
+          setTimeout(() => {
+            btn.style.display = 'none';
+            btn.classList.remove('btn-pop-out');
+            btn.dataset.animating = 'false';
+            if (onComplete) onComplete();
+          }, 300);
+        }, 1000);
+      }
+    }
+
+    function showWideSaveButton(btn) {
+      if (!btn) return;
+      btn.dataset.animating = 'false';
+      btn.classList.remove('save-pulse', 'btn-pop-out');
+      btn.innerHTML = '<span class="btn-text" style="color: #050F1B; font-size: 13px; font-weight: 600;">Сохранить</span>';
+      btn.style.pointerEvents = 'auto';
+      btn.style.minWidth = '110px';
+      btn.style.width = 'auto';
+      btn.style.padding = '0 24px';
+      btn.style.marginLeft = '12px';
+      btn.style.maxWidth = '150px';
+      btn.style.opacity = '1';
+    }
+
+    function bindWidgetsInteractions() {
+      bindScopedWaterListeners(false);
+      bindScopedWaterListeners(true);
+      const wState = getDayWidgetsState(selectedDate);
+
+      document.querySelectorAll('.slot-weight').forEach(slot => {
+        slot.addEventListener('click', () => {
+          const inp = slot.querySelector('input');
+          if (!inp) return;
+          inp.dataset.prev = inp.value;
+          inp.value = '';
+          inp.style.width = '20px';
+          inp.focus();
+
+          const lblShort = document.getElementById('labelWeightShort');
+          const lblWide = document.getElementById('labelWeightWide');
+          if (lblShort) lblShort.style.display = 'none';
+          if (lblWide) lblWide.style.display = 'none';
+
+          const bs = document.getElementById('btnSaveWeightShort');
+          const bw = document.getElementById('btnSaveWeightWide');
+          if (bs) {
+            bs.innerHTML = '<span class="btn-text" style="color: #050F1B; font-size: 11px; font-weight: 700; font-family: Onest; text-transform: uppercase;">ок</span>';
+            bs.style.display = 'flex';
+            bs.classList.add('btn-pop-in');
+          }
+          if (bw) {
+            showWideSaveButton(bw);
+          }
+        });
+      });
+
+      document.querySelectorAll('.slot-steps').forEach(slot => {
+        slot.addEventListener('click', () => {
+          const inp = slot.querySelector('input');
+          if (!inp) return;
+          inp.dataset.prev = inp.value;
+          inp.value = '';
+          inp.style.width = '20px';
+          inp.focus();
+
+          const lblShort = document.getElementById('labelStepsShort');
+          const lblWide = document.getElementById('labelStepsWide');
+          if (lblShort) lblShort.style.display = 'none';
+          if (lblWide) lblWide.style.display = 'none';
+
+          const bss = document.getElementById('btnSaveStepsShort');
+          const bsw = document.getElementById('btnSaveStepsWide');
+          if (bss) {
+            bss.innerHTML = '<span class="btn-text" style="color: #050F1B; font-size: 11px; font-weight: 700; font-family: Onest; text-transform: uppercase;">ок</span>';
+            bss.style.display = 'flex';
+            bss.classList.add('btn-pop-in');
+          }
+          if (bsw) {
+            showWideSaveButton(bsw);
+          }
+        });
+      });
+
+      const ws = document.getElementById('inputWeightShort');
+      const ww = document.getElementById('inputWeightWide');
+
+      [ws, ww].forEach(el => {
+        if (!el) return;
+        el.addEventListener('input', () => {
+          let val = el.value.replace(',', '.').replace(/[^0-9.]/g, '');
+          const parts = val.split('.');
+          if (parts[0].length > 5) {
+            parts[0] = parts[0].slice(0, 5);
+          }
+          val = parts.length > 1 ? parts[0] + '.' + parts.slice(1).join('') : parts[0];
+          el.value = val;
+          wState.weight = val;
+          wState.weightSaved = false;
+
+          if (ws) { ws.value = val; ws.style.width = getWidgetInputWidth(val, 11); }
+          if (ww) { ww.value = val; ww.style.width = getWidgetInputWidth(val, 13); }
+        });
+
+        el.addEventListener('blur', () => {
+          const lblShort = document.getElementById('labelWeightShort');
+          const lblWide = document.getElementById('labelWeightWide');
+          if (lblShort) lblShort.style.display = 'inline-block';
+          if (lblWide) lblWide.style.display = 'inline-block';
+
+          if (!el.value.trim()) {
+            el.value = el.dataset.prev || '0';
+            wState.weight = el.value;
+            if (ws) { ws.value = el.value; ws.style.width = getWidgetInputWidth(el.value, 11); }
+            if (ww) { ww.value = el.value; ww.style.width = getWidgetInputWidth(el.value, 13); }
+          }
+        });
+      });
+
+      const bsws = document.getElementById('btnSaveWeightShort');
+      const bsww = document.getElementById('btnSaveWeightWide');
+
+      if (bsws) {
+        bsws.onclick = (e) => {
+          e.stopPropagation();
+          const lblShort = document.getElementById('labelWeightShort');
+          if (lblShort) lblShort.style.display = 'inline-block';
+          triggerSaveButtonAnim(bsws, () => { wState.weightSaved = true; });
+        };
+      }
+      if (bsww) {
+        bsww.onclick = (e) => {
+          e.stopPropagation();
+          const lblWide = document.getElementById('labelWeightWide');
+          if (lblWide) lblWide.style.display = 'inline-block';
+          triggerSaveButtonAnim(bsww, () => { wState.weightSaved = true; });
+        };
+      }
+
+      const ss = document.getElementById('inputStepsShort');
+      const sw = document.getElementById('inputStepsWide');
+
+      [ss, sw].forEach(el => {
+        if (!el) return;
+        el.addEventListener('input', () => {
+          let val = el.value.replace(/[^0-9]/g, '');
+          if (val.length > 5) {
+            val = val.slice(0, 5);
+          }
+          el.value = val;
+          wState.steps = val;
+          wState.stepsSaved = false;
+
+          if (ss) { ss.value = val; ss.style.width = getWidgetInputWidth(val, 11); }
+          if (sw) { sw.value = val; sw.style.width = getWidgetInputWidth(val, 13); }
+        });
+
+        el.addEventListener('blur', () => {
+          const lblShort = document.getElementById('labelStepsShort');
+          const lblWide = document.getElementById('labelStepsWide');
+          if (lblShort) lblShort.style.display = 'inline-block';
+          if (lblWide) lblWide.style.display = 'inline-block';
+
+          if (!el.value.trim()) {
+            el.value = el.dataset.prev || '0';
+            wState.steps = el.value;
+            if (ss) { ss.value = el.value; ss.style.width = getWidgetInputWidth(el.value, 11); }
+            if (sw) { sw.value = el.value; sw.style.width = getWidgetInputWidth(el.value, 13); }
+          }
+        });
+      });
+
+      const bsss = document.getElementById('btnSaveStepsShort');
+      const bssw = document.getElementById('btnSaveStepsWide');
+
+      if (bsss) {
+        bsss.onclick = (e) => {
+          e.stopPropagation();
+          const lblShort = document.getElementById('labelStepsShort');
+          if (lblShort) lblShort.style.display = 'inline-block';
+          triggerSaveButtonAnim(bsss, () => { wState.stepsSaved = true; });
+        };
+      }
+      if (bssw) {
+        bssw.onclick = (e) => {
+          e.stopPropagation();
+          const lblWide = document.getElementById('labelStepsWide');
+          if (lblWide) lblWide.style.display = 'inline-block';
+          triggerSaveButtonAnim(bssw, () => { wState.stepsSaved = true; });
+        };
+      }
+    }
 
     document.querySelectorAll('.widget-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        switchTab('widgets');
         const key = btn.dataset.widgetKey;
         btn.classList.toggle('active');
-        activeWidgets[key] = btn.classList.contains('active');
+        const isActive = btn.classList.contains('active');
+
+        const dateKey = getDateKey(selectedDate);
+        const currentCfg = getWidgetsConfigForDate(selectedDate);
+        currentCfg[key] = isActive;
+        historicalWidgetsConfigStore[dateKey] = { ...currentCfg };
+
         renderProfileWidgets();
       });
     });
@@ -2612,31 +3870,44 @@
     function renderProfileWidgets() {
       const banner = document.getElementById('profile-default-widget-banner');
       const list = document.getElementById('profile-active-widgets-list');
-      const hasActive = Object.values(activeWidgets).some(Boolean);
+      const activeCfg = getWidgetsConfigForDate(selectedDate);
+      const activeCompact = ['weight', 'steps', 'water'].filter(t => activeCfg[t]);
 
-      if (hasActive) {
+      if (activeCompact.length > 0) {
         banner.classList.add('hidden');
         list.classList.remove('hidden');
         list.innerHTML = '';
-        for (const [key, isActive] of Object.entries(activeWidgets)) {
-          if (!isActive) continue;
-          const meta = widgetMeta[key];
-          const item = document.createElement('div');
-          item.className = 'w-full bg-cardBg rounded-[20px] p-4 flex items-center justify-between border border-white/5 shadow-sm';
-          item.innerHTML = `
-            <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-xl bg-iconPlateBg flex items-center justify-center text-accentGreen shrink-0 shadow-inner">
-                <svg class="w-5 h-5 stroke-current stroke-[2] fill-none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${meta.icon}</svg>
-              </div>
-              <div class="flex flex-col">
-                <span class="font-onest font-medium text-sm text-textWhite/90 leading-tight">${meta.title}</span>
-                <span class="font-onest text-xs text-textWhite/40 leading-snug mt-0.5">${meta.sub}</span>
-              </div>
-            </div>
-            <span class="font-rubik font-semibold text-base text-accentGreen">${meta.value}</span>
-          `;
-          list.appendChild(item);
+
+        let rows = [];
+        if (activeCompact.length === 3) {
+          rows.push(['weight', 'water']);
+          rows.push(['steps']);
+        } else if (activeCompact.length === 2) {
+          if (activeCompact.includes('water')) {
+            const other = activeCompact.find(x => x !== 'water');
+            rows.push([other, 'water']);
+          } else {
+            rows.push(['weight', 'steps']);
+          }
+        } else if (activeCompact.length === 1) {
+          rows.push([activeCompact[0]]);
         }
+
+        rows.forEach(group => {
+          if (group.length === 2) {
+            const rowDiv = document.createElement('div');
+            rowDiv.style.cssText = 'width: 100%; display: flex; align-items: center; gap: 16px; margin-bottom: 0px;';
+            rowDiv.innerHTML = buildCompactWidgetCard(group[0]) + buildCompactWidgetCard(group[1]);
+            list.appendChild(rowDiv);
+          } else {
+            const wideDiv = document.createElement('div');
+            wideDiv.style.cssText = 'width: 100%; margin-bottom: 0px;';
+            wideDiv.innerHTML = buildWideWidgetCard(group[0]);
+            list.appendChild(wideDiv);
+          }
+        });
+
+        bindWidgetsInteractions();
       } else {
         banner.classList.remove('hidden');
         list.classList.add('hidden');
@@ -2649,6 +3920,7 @@
       renderDateSlider(true);
       updateDateDisplay();
       updateMetrics();
+      renderProfileWidgets();
     });
   </script>
 </body>
